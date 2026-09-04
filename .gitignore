@@ -1,0 +1,24 @@
+.idea/
+.vscode/
+*.iml
+target/
+**/target/
+node_modules/
+**/node_modules/
+.npm-cache/
+dist/
+**/dist/
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Generated build and release artifacts
+build/
+dist-release/
+library-dependencies/
+packaging/stage/
+packaging/previous-release/

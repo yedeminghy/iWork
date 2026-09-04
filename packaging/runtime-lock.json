@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "feature": 21,
+  "vendor": "Eclipse Adoptium",
+  "version": "21.0.12",
+  "implementorVersion": "Temurin-21.0.12+8",
+  "releaseSha256": "0838ec7abab7d1b89d425e36735dbb696889e05968c1dbae18eae631972f443e",
+  "downloadUrl": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12_8.zip",
+  "archiveSha256": "9ba963ee2371874a74185d18bc7bb2ab9407df7683300855ed7606e0662321d0",
+  "note": "Official Eclipse Adoptium archive lock revalidated against the matching .sha256.txt on 2026-09-01."
+}

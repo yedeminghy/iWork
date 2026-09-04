@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "sourceEvidence": "soak-summary.json",
+  "sourceStatus": "failed",
+  "observed": {
+    "durationSeconds": 28841,
+    "completedTurns": 6217,
+    "failureCodes": [
+      "SOAK_EVENT_TIMEOUT"
+    ],
+    "expectedApprovalSlots": 311,
+    "recordedApprovalDecisions": 16,
+    "expectedCancelSlots": 311,
+    "recordedCancellations": 311,
+    "expectedSteeringSlots": 311,
+    "recordedSteeringActions": 311,
+    "allResourceAndIntegrityThresholdsPassed": true,
+    "allFinalCountersZero": true
+  },
+  "rootCause": {
+    "code": "SOAK_APPROVAL_THREAD_REUSE",
+    "classification": "HARNESS_DEFECT",
+    "description": "The harness reused four load-test threads for explicit approval decisions. After ALLOW_THREAD, the application correctly auto-authorized an identical request and emitted no approval.required event, while the harness still required that event and recorded SOAK_EVENT_TIMEOUT."
+  },
+  "remediation": {
+    "approvalDecisionThreadsIsolated": true,
+    "placeholderEvidenceIdsRejected": true,
+    "hostRecoveryTimeoutBoundedMs": 120000,
+    "regressionSmokeStatus": "passed",
+    "regressionSmokeCompletedTurns": 60,
+    "regressionSmokeEvidence": "soak-smoke-summary.json"
+  },
+  "disposition": "ADJUDICATED_FOR_CONTROLLED_BETA_INTERNAL_ONLY",
+  "adjudicationEvidence": "soak-adjudication.json",
+  "productionRequiresFreshFullSoak": true
+}

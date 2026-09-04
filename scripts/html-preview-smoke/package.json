@@ -1,0 +1,6 @@
+{
+  "name": "agent-desktop-html-preview-smoke",
+  "private": true,
+  "type": "module",
+  "main": "../verify-html-preview.mjs"
+}

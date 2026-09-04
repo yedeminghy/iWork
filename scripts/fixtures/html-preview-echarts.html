@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <title>ECharts preview smoke</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="flex">
+      <table>
+        <tbody>
+          <tr><td>iWork</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <div id="chart" style="width: 320px; height: 180px"></div>
+    </div>
+    <script>
+      const chart = echarts.init(document.getElementById('chart'));
+      chart.setOption({
+        xAxis: { type: 'category', data: ['iWork'] },
+        yAxis: { type: 'value' },
+        series: [{ type: 'bar', data: [1] }]
+      });
+    </script>
+  </body>
+</html>

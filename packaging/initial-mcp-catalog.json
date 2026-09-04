@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "servers": [
+    {
+      "id": "mcp_builtin-xquant-indicator-v1",
+      "name": "xquant-indicator-mcp",
+      "transport": "STREAMABLE_HTTP",
+      "endpoint": "http://172.19.8.39:8091/mcp",
+      "enabled": true,
+      "reconnectPolicy": {
+        "maxAttempts": 3,
+        "initialBackoffMs": 250,
+        "maxBackoffMs": 2000
+      }
+    }
+  ]
+}

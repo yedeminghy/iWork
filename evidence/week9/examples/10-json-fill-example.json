@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "realSamples": {
+    "providers": [
+      {
+        "providerId": "deepseek",
+        "status": "passed",
+        "evidenceId": "ev_3f2a1b9c4d5e"
+      },
+      {
+        "providerId": "qwen",
+        "status": "passed",
+        "evidenceId": "ev_7c81dcc2241a"
+      }
+    ],
+    "mcp": [
+      {
+        "transport": "STDIO",
+        "status": "passed",
+        "replayedCalls": 0,
+        "evidenceId": "ev_9ab0ff13e2c7"
+      },
+      {
+        "transport": "STREAMABLE_HTTP",
+        "status": "passed",
+        "replayedCalls": 0,
+        "evidenceId": "ev_5d1e04a8b639"
+      }
+    ],
+    "skills": {
+      "status": "passed",
+      "evidenceId": "ev_2c6d7e8091b4"
+    }
+  },
+  "installEnvironments": [
+    {
+      "environmentId": "env_a1b2c3d4e5f6",
+      "kind": "CLEAN_WINDOWS_X64",
+      "lifecycle": {
+        "freshInstall": true,
+        "firstStart": true,
+        "upgrade": true,
+        "uninstallRetention": true,
+        "reinstallRecovery": true
+      },
+      "evidenceId": "ev_e4b19d2c0735"
+    },
+    {
+      "environmentId": "env_b2c3d4e5f6a1",
+      "kind": "CLEAN_WINDOWS_X64",
+      "lifecycle": {
+        "freshInstall": true,
+        "firstStart": true,
+        "upgrade": true,
+        "uninstallRetention": true,
+        "reinstallRecovery": true
+      },
+      "evidenceId": "ev_f08a3c6e1297"
+    },
+    {
+      "environmentId": "env_c3d4e5f6a1b2",
+      "kind": "MANAGED_WINDOWS_X64",
+      "lifecycle": {
+        "freshInstall": true,
+        "firstStart": true,
+        "upgrade": true,
+        "uninstallRetention": true,
+        "reinstallRecovery": true
+      },
+      "evidenceId": "ev_6d94b0c81e23"
+    }
+  ],
+  "beta": {
+    "testers": [
+      {
+        "testerId": "tester_11a2b3c4d5e6",
+        "result": "passed",
+        "evidenceId": "ev_a02b5d8c31f7"
+      },
+      {
+        "testerId": "tester_22b3c4d5e6f7",
+        "result": "passed",
+        "evidenceId": "ev_b13c6e9d4208"
+      },
+      {
+        "testerId": "tester_33c4d5e6f7a8",
+        "result": "passed",
+        "evidenceId": "ev_c24d7fae5319"
+      },
+      {
+        "testerId": "tester_44d5e6f7a8b9",
+        "result": "passed",
+        "evidenceId": "ev_d35e8abf6420"
+      },
+      {
+        "testerId": "tester_55e6f7a8b9c0",
+        "result": "passed",
+        "evidenceId": "ev_e46f9bc07531"
+      },
+      {
+        "testerId": "tester_66f7a8b9c0d1",
+        "result": "passed",
+        "evidenceId": "ev_f570acd08642"
+      },
+      {
+        "testerId": "tester_77a8b9c0d1e2",
+        "result": "passed",
+        "evidenceId": "ev_0681bde19753"
+      },
+      {
+        "testerId": "tester_88b9c0d1e2f3",
+        "result": "passed",
+        "evidenceId": "ev_1792cef2a864"
+      }
+    ],
+    "issues": [
+      {
+        "issueId": "issue_001",
+        "severity": "P2",
+        "status": "accepted_with_decision",
+        "summary": "深色主题下诊断预览滚动条对比度不足",
+        "ownerId": "ui_owner_01",
+        "targetVersion": "1.0.1"
+      },
+      {
+        "issueId": "issue_002",
+        "severity": "P3",
+        "status": "deferred",
+        "summary": "Skill 激活音效在静音模式下仍然播放",
+        "ownerId": "ux_owner_02",
+        "targetVersion": "1.1.0"
+      }
+    ]
+  }
+}

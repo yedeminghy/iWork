@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "deepseek-v4-pro",
+      "providerId": "deepseek",
+      "displayName": "DeepSeek V4 Pro",
+      "adapter": "OPENAI_COMPATIBLE",
+      "modelId": "deepseek-v4-pro",
+      "region": "global",
+      "capabilities": ["STREAM_TEXT", "STRUCTURED_TOOL_CALL", "CANCEL"]
+    },
+    {
+      "id": "qwen3.7-flash",
+      "providerId": "qwen",
+      "displayName": "Qwen 3.7 Flash",
+      "adapter": "DASHSCOPE",
+      "modelId": "qwen3.7-flash",
+      "region": "account-bound",
+      "capabilities": ["STREAM_TEXT", "STRUCTURED_TOOL_CALL", "CANCEL"]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "realSamples": {
+    "providers": [
+      { "providerId": "deepseek", "status": "passed", "evidenceId": "provider_deepseek_001" },
+      { "providerId": "qwen", "status": "passed", "evidenceId": "provider_qwen_001" }
+    ],
+    "mcp": [
+      { "transport": "STDIO", "status": "passed", "replayedCalls": 0, "evidenceId": "mcp_stdio_001" },
+      { "transport": "STREAMABLE_HTTP", "status": "passed", "replayedCalls": 0, "evidenceId": "mcp_http_001" }
+    ],
+    "skills": { "status": "passed", "evidenceId": "skills_real_001" }
+  },
+  "installEnvironments": [
+    {
+      "environmentId": "env_111111111111",
+      "kind": "CLEAN_WINDOWS_X64",
+      "lifecycle": { "freshInstall": true, "firstStart": true, "upgrade": true, "uninstallRetention": true, "reinstallRecovery": true },
+      "evidenceId": "install_clean_001"
+    },
+    {
+      "environmentId": "env_222222222222",
+      "kind": "CLEAN_WINDOWS_X64",
+      "lifecycle": { "freshInstall": true, "firstStart": true, "upgrade": true, "uninstallRetention": true, "reinstallRecovery": true },
+      "evidenceId": "install_clean_002"
+    },
+    {
+      "environmentId": "env_333333333333",
+      "kind": "MANAGED_WINDOWS_X64",
+      "lifecycle": { "freshInstall": true, "firstStart": true, "upgrade": true, "uninstallRetention": true, "reinstallRecovery": true },
+      "evidenceId": "install_managed_001"
+    }
+  ],
+  "beta": {
+    "testers": [
+      { "testerId": "tester_111111111111", "result": "passed", "evidenceId": "beta_001" }
+    ],
+    "issues": [
+      { "issueId": "issue_111111111111", "severity": "P3", "status": "closed", "ownerId": "owner_product", "targetVersion": "1.1" }
+    ]
+  }
+}

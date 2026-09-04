@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "13eb0a161aa2819bdca43b53709ecf86ca7ab648325a8fb533e7b3c37c8aae7b",
+  "status": "passed",
+  "highRiskFindings": 0,
+  "sentinelScanPassed": true,
+  "boundaries": {
+    "rendererIpc": "passed",
+    "loopback": "passed",
+    "providerSecret": "passed",
+    "permission": "passed",
+    "fileRoot": "passed",
+    "script": "passed",
+    "preview": "passed",
+    "contentLeakage": "passed"
+  },
+  "checks": [
+    {
+      "id": "week9-contracts",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "id": "artifact-preview",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "id": "release-manifest",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "id": "packaged-content",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "id": "legal-release",
+      "status": "passed",
+      "exitCode": 0
+    }
+  ]
+}

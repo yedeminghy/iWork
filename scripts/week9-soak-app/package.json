@@ -1,0 +1,6 @@
+{
+  "name": "iwork-week9-soak-harness",
+  "private": true,
+  "type": "module",
+  "main": "../run-week9-soak.mjs"
+}

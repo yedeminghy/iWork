@@ -1,0 +1,63 @@
+export type AgUiEvent = {
+  type: string;
+  runId: string;
+  threadId: string;
+  turnId: string;
+  sequence: number;
+  timestamp: string;
+  value: Record<string, unknown>;
+};
+
+export type RunAgentInput = {
+  threadId: string;
+  runId: string;
+  messages: Array<{ id: string; role: 'user'; content: string }>;
+  context: { turnId: string; workspaceId: 'ws_default'; modelProfileId: string; maxIterations:number };
+  explicitSkillIds?: string[];
+  secretSessionId?: string;
+  retryOfTurnId?: string;
+};
+
+export type HostState = { status: 'starting' | 'ready' | 'restarting' | 'crash-loop' | 'stopping' | 'stopped' | 'failed'; diagnosticCode?: string; diagnosticId?: string };
+export type ReleaseInfo = { appVersion:string;hostVersion:string;channel:'internal'|'beta'|'production';signed:boolean;platform:'win32';arch:'x64' };
+export type RecoveryState = { hostState:'STARTING'|'READY'|'RESTARTING'|'CRASH_LOOP'|'FAILED';recoveredFromUncleanExit:boolean;diagnosticId?:string };
+
+export type ThreadSummary = { id: string; title: string; status: 'ACTIVE' | 'ARCHIVED'; modelProfileId: string;
+  updatedAt: string; lastTurnStatus?: string | null; preview?: string | null };
+export type TurnSummary = { id: string; runId: string; status: string; startedAt: string; finishedAt?: string | null;
+  errorCode?: string | null; lastSequence: number; retryOfTurnId?:string|null };
+export type TimelineEntry = { id: string; turnId?: string | null; kind: 'USER_MESSAGE' | 'ASSISTANT_MESSAGE' | 'TOOL_CALL' | 'SKILL_ACTIVATION' | 'APPROVAL' | 'ERROR' | 'CORRUPTED_ITEM'; value: Record<string, unknown> };
+export type ThreadSnapshot = { schemaVersion: 2; thread: ThreadSummary; turns: TurnSummary[]; timeline: TimelineEntry[] };
+export type ThreadPage = { items: ThreadSummary[]; nextCursor?: string | null };
+export type TurnOperationResult = { turnId: string; status: string };
+export type RetryPreparation={turnId:string;threadId:string;message:string;modelProfileId:string};
+export type DiagnosticPreview={schemaVersion:number;generatedAt:string;release:Record<string,unknown>;platform:Record<string,unknown>;providers:Array<Record<string,unknown>>;mcp:Array<Record<string,unknown>>;database:Record<string,unknown>;process:Record<string,unknown>;files:string[];excluded:string[];safeEvents:Array<Record<string,unknown>>};
+export type ProviderCapability='STREAM_TEXT'|'STRUCTURED_TOOL_CALL'|'CANCEL';
+export type ProviderProfileSummary={id:string;providerId:'deepseek'|'qwen';displayName:string;modelId:string;adapter:string;region:string;expectedCapabilities:ProviderCapability[];observedCapabilities:ProviderCapability[];status:'NOT_CONFIGURED'|'READY'|'ERROR';lastErrorCode?:string|null;lastCheckedAt?:string|null;catalogVersion:string};
+export type ProviderCheckResult={profileId:string;status:'NOT_CONFIGURED'|'READY'|'ERROR';observedCapabilities:ProviderCapability[];errorCode?:string|null;checkedAt:string};
+export type McpServerSummary = { id:string; name:string; transport:'STDIO'|'STREAMABLE_HTTP'; status:string; enabled:boolean; endpoint?:string|null; executable?:string|null; arguments:string[]; workingDirectory?:string|null; allowedEnvironmentNames:string[]; credentialRef?:string|null; lastErrorCode?:string|null; lastConnectedAt?:string|null; catalogVersion:number };
+export type McpServerDraft = { id?:string; name:string; transport:'STDIO'|'STREAMABLE_HTTP'; enabled:boolean; endpoint?:string; executable?:string; arguments?:string[]; workingDirectory?:string; allowedEnvironmentNames?:string[]; credentialRef?:string };
+export type ToolDescriptor = { id:string; serverId:string; name:string; displayName:string; description:string; inputSchema:unknown; riskClass:string; enabled:boolean; unavailableReason?:string|null };
+export type McpDiagnostic = { serverId:string; status:string; errorCode?:string|null; summary?:string|null; recentStderr:string[] };
+export type SkillScope='BUILTIN'|'USER'|'WORKSPACE';
+export type SkillStatus='VALID'|'INVALID'|'SHADOWED'|'MISSING';
+export type SkillSummary={id:string;name:string;description:string;scope:SkillScope;status:SkillStatus;enabled:boolean;compatibility?:string|null;warningCodes:string[];lastErrorCode?:string|null;shadowedById?:string|null;generation:number};
+export type SkillResourceDescriptor={id:string;relativePath:string;kind:string;mediaType?:string|null;byteSize:number;contentHash?:string|null;executableCandidate:boolean};
+export type SkillDetail=SkillSummary&{license?:string|null;metadata:Record<string,string>;allowedTools?:string|null;extensions:Record<string,unknown>;contentHash:string;instructions?:string|null;resources:SkillResourceDescriptor[]};
+export type SkillResourceView={skillId:string;resourceId:string;relativePath:string;kind:string;mediaType?:string|null;byteSize:number;contentHash?:string|null;binary:boolean;content?:string|null};
+export type SkillRefreshResult={scope:SkillScope;generation:number;valid:number;invalid:number;shadowed:number;missing:number;status:string;errorCode?:string|null};
+export type SkillImportSource={type:'LOCAL_DIRECTORY'|'GITHUB';repositoryUrl?:string|null;requestedRef?:string|null;resolvedCommitSha?:string|null;subdirectory?:string|null};
+export type SkillDependencyHint={type:string;value:string;status:'AVAILABLE'|'DISABLED'|'UNAVAILABLE'|'UNKNOWN'};
+export type SkillImportManifest={sessionId:string;source:SkillImportSource;name:string;description:string;license?:string|null;compatibility?:string|null;skillDocumentHash:string;packageHash:string;totalBytes:number;resources:SkillResourceDescriptor[];dependencies:SkillDependencyHint[];warningCodes:string[];conflict:'NONE'|'IDENTICAL'|'REPLACE_REQUIRED'|'WILL_BE_SHADOWED'|'CONFLICTED';expectedExistingContentHash?:string|null;expiresAt:string};
+export type SkillInstallResult={skillId:string;name:string;operation:string;packageHash:string;contentHash:string;enabled:boolean;managed:boolean;rollbackAvailable:boolean;installedAt:string};
+export type SkillInstallationInfo={managed:boolean;sourceType?:string|null;repositoryUrl?:string|null;resolvedCommitSha?:string|null;installedAt?:string|null;rollbackAvailable:boolean};
+export type ApprovalDecision='ALLOW_ONCE'|'ALLOW_THREAD'|'DENY';
+export type ApprovalResolution={approvalId:string;decision:string;requestFingerprint:string;replayed:boolean};
+export type FileRootMode='READ_ONLY'|'READ_WRITE';
+export type FileRootSummary={id:string;workspaceId:string;label:string;maskedPath:string;pathHash:string;mode:FileRootMode;enabled:boolean;defaultRoot:boolean;version:number;createdAt:string;updatedAt:string};
+export type RuntimeLogSettingsView={enabled:boolean;main:boolean;host:boolean;renderer:boolean;directoryLabel:string;directoryMaskedPath:string;maxFileSizeMb:number;maxFiles:number};
+export type RuntimeLogSettingsUpdate={enabled:boolean;main:boolean;host:boolean;renderer:boolean};
+export type DesktopSettingsView={defaultWorkspaceLabel:string;defaultWorkspaceMaskedPath:string;maxIterations:number;workspaceRestartRequired:boolean;runtimeLogs:RuntimeLogSettingsView};
+export type OutputArtifact={rootId:'root_default';relativePath:string;fileName:string;mediaType:string;byteSize:number};
+export type ArtifactPreview=({kind:'markdown';content:string}|{kind:'html';content:string;previewId:string;baseUrl:string;url:string}|{kind:'word';contentBase64:string}|{kind:'excel';contentBase64:string}|{kind:'presentation'}|{kind:'unsupported';message:string})&{fileName:string;byteSize:number};
+export type ArtifactLayoutPreview={previewId:string;url:string};

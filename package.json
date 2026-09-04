@@ -1,0 +1,31 @@
+{
+  "name": "agent-desktop",
+  "version": "1.0.0",
+  "description": "iWork local-first desktop AI agent",
+  "author": "杭州烛光鱼有限公司",
+  "private": true,
+  "type": "module",
+  "main": "desktop-shell/dist/main.js",
+  "workspaces": [
+    "desktop-shell",
+    "desktop-ui"
+  ],
+  "scripts": {
+    "build": "npm run build:office-runtime && npm run build --workspace desktop-ui && npm run build --workspace desktop-shell",
+    "build:office-runtime": "node scripts/build-office-runtime.mjs",
+    "test:pptx-runtime": "node scripts/verify-pptx-runtime.mjs",
+    "typecheck": "npm run typecheck --workspace desktop-ui && npm run typecheck --workspace desktop-shell",
+    "dev": "npm run dev --workspace desktop-ui",
+    "package:win": "powershell -ExecutionPolicy Bypass -File ./scripts/build-week7-package.ps1 -Channel internal",
+    "dist:win": "npm run package:win"
+  },
+  "devDependencies": {
+    "docx": "^9.7.1",
+    "electron-builder": "26.0.12",
+    "esbuild": "^0.25.9",
+    "lucide": "1.33.0",
+    "postcss": "^8.5.26",
+    "pptxgenjs": "4.0.1",
+    "tailwindcss": "3.4.17"
+  }
+}

@@ -1,0 +1,38 @@
+appId: com.candlefish.iwork
+productName: iWork
+copyright: Copyright © 2026 杭州烛光鱼有限公司
+asar:
+  smartUnpack: false
+npmRebuild: false
+directories:
+  output: dist-release
+  buildResources: build
+files:
+  - package.json
+  - desktop-shell/dist/**
+  - desktop-ui/dist/**
+  - '!**/*.map'
+extraResources:
+  - from: packaging/stage
+    to: .
+  - from: packaging/legal
+    to: legal
+win:
+  icon: icon.ico
+  signAndEditExecutable: false
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: iWork-${version}-windows-${arch}.${ext}
+nsis:
+  license: packaging/legal/EULA_zh-CN.txt
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
+  differentialPackage: false
+  runAfterFinish: true
+  packElevateHelper: false

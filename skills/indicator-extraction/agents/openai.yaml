@@ -1,0 +1,13 @@
+interface:
+  display_name: "指标提取Skill"
+  short_description: "解析对象，计算单指标或指标方案并按需输出报告、HTML 或可追溯 JSON"
+  default_prompt: "使用 $indicator-extraction 解析计算对象，完成单指标或指标方案查询，并按用户意图展示结果、生成 ECharts/HTML 图表或返回 JSON。"
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "xquant-indicator-mcp"
+      description: "解析计算对象，检索、描述和计算单指标或指标方案，并获取受控动态参数候选值。"
+
+policy:
+  allow_implicit_invocation: true

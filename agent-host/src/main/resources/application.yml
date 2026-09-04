@@ -1,0 +1,20 @@
+server:
+  address: 127.0.0.1
+  port: 0
+  shutdown: graceful
+spring:
+  application:
+    name: agent-host
+  lifecycle:
+    timeout-per-shutdown-phase: 5s
+  main:
+    banner-mode: off
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  codec:
+    max-in-memory-size: 1MB
+logging:
+  level:
+    root: INFO
+    dev.agentdesktop: INFO

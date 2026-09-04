@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "2b93f519241389300f300c487ace994b72cf8bf6e780071ad41ed110e33da4c3",
+  "status": "failed",
+  "developmentOnly": true,
+  "durationSeconds": 498,
+  "completedTurns": 60,
+  "scenarios": {
+    "chat": 21,
+    "mcpStdio": 7,
+    "mcpHttp": 6,
+    "skillScripts": {
+      "powershell": 3,
+      "python": 3,
+      "javascript": 3
+    },
+    "approvals": {
+      "allowOnce": 1,
+      "allowThread": 4,
+      "deny": 3,
+      "expired": 1
+    },
+    "control": {
+      "cancel": 3,
+      "retry": 3,
+      "steering": 3
+    },
+    "faults": {
+      "providerDisconnect": 3,
+      "mcpExit": 1,
+      "rendererReload": 1,
+      "hostRestart": 1
+    }
+  },
+  "thresholds": {
+    "rssPassed": true,
+    "heapPassed": true,
+    "threadsPassed": true,
+    "handlesPassed": true,
+    "cancellationPassed": true,
+    "approvalResumePassed": true,
+    "databaseIntegrityPassed": true,
+    "terminalUniquenessPassed": true
+  },
+  "finalCounters": {
+    "activeTurns": 0,
+    "pendingApprovals": 0,
+    "pendingSecretSessions": 0,
+    "sseSubscribers": 0,
+    "ownedChildProcesses": 0
+  },
+  "sampleCount": 13,
+  "failureCodes": [
+    "host:RUNTIME_ERROR"
+  ]
+}

@@ -1,0 +1,27 @@
+iWork internal acceptance build.
+
+This package includes an Eclipse Temurin Java 21 runtime image and Electron.
+Their license and legal notice files are distributed with the packaged runtime
+and application dependencies. A production release must replace this internal
+notice with the reviewed product-specific third-party notices.
+
+Office preview components added to the Electron renderer:
+
+- PptxGenJS 4.0.1, MIT License
+  https://github.com/gitbrent/PptxGenJS
+
+- docx-preview 0.4.0, Apache License 2.0
+  https://github.com/VolodymyrBaydalka/docxjs
+- SheetJS Community Edition 0.20.3, Apache License 2.0
+  https://git.sheetjs.com/sheetjs/sheetjs
+- PDF.js 6.2.108, Apache License 2.0
+  https://github.com/mozilla/pdf.js
+- JSZip (transitive dependency of docx-preview), MIT or GPL-3.0-or-later;
+  this application uses it under the MIT license
+  https://github.com/Stuk/jszip
+
+Built-in Skill content:
+
+- web-artifacts-builder, Apache License 2.0; its LICENSE.txt is distributed
+  with the Skill package.
+- indicator-extraction, project-owned business Skill supplied for iWork.
