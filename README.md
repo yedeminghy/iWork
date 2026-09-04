@@ -1,82 +1,103 @@
-# Agent Desktop
+# iWork
 
-一期实现中的本地优先 AI Agent 桌面应用。当前代码完成 Java Host 的首个可运行闭环：安全 bootstrap、loopback HTTP 鉴权、SQLite 持久化、Mock Provider 的 AG-UI/SSE 流式输出与取消。
+本地优先的 AI Agent 桌面应用。iWork 由 Electron/React 桌面端与 Java 21 Host 组成：Host 仅在本机 loopback 地址上运行，负责模型、工具、Skill、权限和 SQLite 持久化；桌面端提供会话、设置、审批和输出物预览界面。
 
-设计基线见 [`docs/phase-1/PHASE_1_DETAILED_DESIGN.md`](docs/phase-1/PHASE_1_DETAILED_DESIGN.md)，第 6 周执行设计见 [`docs/phase-1/WEEK_6_DETAILED_DESIGN.md`](docs/phase-1/WEEK_6_DETAILED_DESIGN.md)。
+> 当前版本面向内部受控使用。正式生产发布仍需完成代码签名、正式产品身份、法务材料以及干净 Windows 环境的安装/升级验收。
 
-## 构建
+## 功能概览
 
-要求 JDK 21 与 Maven 3.9+：
+- 流式对话与持久化会话：支持新建、搜索、重命名、归档、恢复和重启后历史恢复。
+- Provider 与 MCP：支持受控 Provider 配置、STDIO 与 Streamable HTTP MCP，以及结构化 Tool Card 时间线。
+- Skill：支持内置、用户和工作区三类 scope；可显式/隐式激活、按需读取资源，并从本地目录或公开 GitHub 仓库预览后安装。
+- 权限与审批：文件、Skill 脚本和高风险 MCP 操作统一经过权限引擎，可单次允许、当前会话允许或拒绝。
+- 工作区文件与输出物：受限根目录下的文本读写；DOCX、XLSX、PDF 和 HTML/Markdown 输出物卡片与本地预览。
+- Windows 交付：提供 Electron 打包、发布清单和升级/恢复相关自动化验证。
 
-```powershell
-$env:JAVA_HOME = 'C:\Program Files\Java\jdk21.0.10'
-$env:Path = "$env:JAVA_HOME\bin;D:\03.Softwares\apache-maven-3.9.16\bin;$env:Path"
-mvn clean verify
-```
+## 安全边界
 
-任何 Provider API Key 都不得放入仓库、命令行、环境变量或普通配置文件。
+- Java Host 只监听随机 loopback 端口，并校验 Bearer token 与应用协议版本。
+- Renderer 不直接获得 Node.js、文件系统、Shell 或通用网络能力；所有 IPC 均为受限接口。
+- Provider 密钥只经应用设置录入和本地安全存储管理；禁止提交到仓库、命令行、环境变量、日志或测试证据。
+- Skill 的脚本、`allowed-tools` 与 MCP 声明不会自动授予执行权限；副作用操作默认需审批。
 
-## 一键验证 Host 闭环
+## 项目结构
 
-Maven 中央仓库或企业镜像可访问时运行：
+| 目录 | 说明 |
+| --- | --- |
+| `agent-host` | Spring Boot Host、HTTP API、应用安全边界与生命周期管理 |
+| `agent-runtime` | 模型、工具、权限、Skill 与工作区运行时 |
+| `agent-mcp` | MCP 传输、客户端管理与结果脱敏 |
+| `agent-persistence` | SQLite/Flyway 持久化 |
+| `desktop-shell` | Electron Main、preload 与桌面集成 |
+| `desktop-ui` | React/Vite Renderer |
+| `skills` | 内置 Skill 包 |
+| `scripts` | 构建、打包和分周验证脚本 |
+| `docs/phase-1` | 架构、设计、验收与发布文档 |
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\verify-phase1.ps1
-```
+## 环境要求
 
-脚本会在临时目录启动 Host，并依次验证 bootstrap/ready 握手、Bearer 与协议版本鉴权、Mock AG-UI/SSE 流、SQLite 时间线和优雅关闭；结束后清理其创建的临时目录。脚本不读取 Provider API Key。
+- Windows 10/11 x64
+- JDK 21
+- Maven 3.9+
+- Node.js 与 npm（推荐使用项目锁定的依赖版本）
 
-## 验证桌面端
+## 安装依赖与构建
 
 ```powershell
 npm install
+mvn clean verify
 npm run typecheck
 npm run build
 ```
 
-生产构建完成后，可执行完整桌面链路冒烟；脚本会以隐藏窗口启动 Electron，并验证 Renderer、preload IPC、Java Host、AG-UI/SSE 与 React 流式展示：
+`npm run build` 会先准备 Office 预览运行时，再构建 Renderer 与 Electron Shell。构建产物、依赖、安装包和本地数据库均由 `.gitignore` 排除。
+
+## 本地开发
+
+先打包 Java Host：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\verify-desktop-smoke.ps1 -SkipBuild
+mvn -pl agent-host -am package
 ```
 
-开发运行前先完成 Java Host 打包，然后在两个终端中运行：
+在一个终端启动 Renderer：
 
 ```powershell
-# 终端 1
-npm run dev --workspace desktop-ui
+npm run dev
+```
 
-# 终端 2
+再在另一终端启动 Electron：
+
+```powershell
 $env:AGENT_DESKTOP_DEV_URL = 'http://127.0.0.1:5173'
-$env:AGENT_DESKTOP_JAVA = 'C:\Program Files\Java\jdk21.0.10\bin\java.exe'
+$env:AGENT_DESKTOP_JAVA = 'C:\Program Files\Java\jdk-21\bin\java.exe'
 $env:AGENT_DESKTOP_HOST_JAR = (Resolve-Path '.\agent-host\target\agent-host-0.1.0-SNAPSHOT.jar')
 npx electron desktop-shell/dist/main.js
 ```
 
-Electron 首次安装需要访问其官方二进制发布地址；企业网络应配置受信代理或内部镜像。
+请按本机 JDK 实际安装位置调整 `AGENT_DESKTOP_JAVA`。
 
-## 验证第 4 周 Skill 闭环
+## 验证
 
-以下命令一次完成 42 项 Java 测试、TypeScript、生产构建、真实 Renderer 两轮验收、敏感内容扫描和第 3 周回归：
+日常完整回归入口：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-week4.ps1
 ```
 
-手工界面复核时，先按上面的开发运行方式启动应用，然后：
+分阶段验收脚本位于 `scripts/verify-week2.ps1` 至 `scripts/verify-week9.ps1`。第 9 周脚本的 `commit`、`matrix`、`soak` 与 `beta` profile 分别覆盖提交门禁、安装矩阵、长稳运行和最终受控内测门禁；使用任何 `-Skip*` 参数都会将结果标记为 `development-only`。
 
-1. 打开 `Skills`，切换来源和状态筛选，点击“刷新”，确认结果统计稳定显示。
-2. 打开一个 Skill，确认 `SKILL.md`、HTML 标签及资源都以纯文本展示；点击“停用/启用”验证状态变化。
-3. 回到会话，在输入区选择 Skill，确认 chip 出现；发送后确认“已显式启用”并且 chip 清空。
-4. 不选择 Skill，输入与其 description 明确匹配的请求，确认出现“已隐式启用”。
-5. 请求某个引用资源，确认只展示/加载目标资源；重启应用后确认启停状态和显式/隐式激活摘要仍存在。
-
-## 验证第 5 周 Skill 导入与安装
-
-以下命令运行 Java/TypeScript/生产构建、两轮 Electron 导入与重启验收、来源与敏感信息扫描，并串行回归第 4、3 周：
+## Windows 打包
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\verify-week5.ps1
+npm run package:win
 ```
 
-Skills 页面支持从本地目录或公开 GitHub 仓库检查 Skill。检查只生成预览；用户二次确认后才原子安装到 USER scope，新 Skill 默认停用。由本应用管理的安装可删除，并可在一次成功替换后回滚最近版本。导入不会执行脚本、安装 MCP Server 或授予 Tool 权限。
+产物位于 `dist-release/`，其中包括安装器、`win-unpacked/`、发布清单和产物摘要。当前内部候选包未签名，不能作为正式生产发布依据。
+
+## 文档
+
+- [一期总体设计](docs/phase-1/PHASE_1_DETAILED_DESIGN.md)
+- [实施状态](docs/phase-1/IMPLEMENTATION_STATUS.md)
+- [第 9 周发布门禁](docs/phase-1/WEEK_9_DETAILED_DESIGN.md)
+- [生产发布待办](docs/phase-1/PRODUCTION_RELEASE_TODO.md)
