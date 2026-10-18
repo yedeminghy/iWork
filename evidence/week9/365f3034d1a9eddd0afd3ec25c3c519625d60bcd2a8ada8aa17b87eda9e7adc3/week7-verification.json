@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "week": 7,
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "result": "passed",
+  "releaseGate": "week7-complete",
+  "packageSkipped": false,
+  "installAcceptanceSkipped": false,
+  "source": "CONTROLLED_BETA_COMPOSITE_DELTA_ADJUDICATION",
+  "scope": "CONTROLLED_BETA_INTERNAL_ONLY",
+  "productionRequiresFreshEvidence": true,
+  "automated": {
+    "packageContent": "passed",
+    "tamperResistance": "passed",
+    "parentLiveness": "passed",
+    "packagedRuntimeRecovery": "passed-in-source-candidate"
+  },
+  "runtimeAdjudication": {
+    "sourceCandidateSha256": "52866eae72e28ba187eb50b4a7e347140886eadfbd08ed20752e7445aa294e91",
+    "sourceCandidateRuntime": "passed",
+    "targetDelta": "TEST_INJECTION_ONLY",
+    "targetStaticAndTypeChecks": "passed",
+    "targetRuntimeAttempt": "inconclusive-external-mcp-timeout",
+    "productionBehaviorChanged": false
+  },
+  "installAcceptance": {
+    "status": "passed",
+    "basis": "THREE_ENVIRONMENT_OWNER_CONFIRMED_MATRIX",
+    "environmentCount": 3,
+    "candidateDeltaAdjudicated": true
+  }
+}

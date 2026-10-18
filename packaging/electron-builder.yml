@@ -4,6 +4,7 @@ copyright: Copyright © 2026 杭州烛光鱼有限公司
 asar:
   smartUnpack: false
 npmRebuild: false
+publish: null
 directories:
   output: dist-release
   buildResources: build

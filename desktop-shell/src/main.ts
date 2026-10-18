@@ -419,7 +419,19 @@ async function runDesktopSmoke(): Promise<void> {
       const snapshot=await supervisor.snapshot(completed.threadId);
       if(!snapshot.turns.some(turn=>turn.id===completed.turnId&&turn.status==='COMPLETED'))throw new Error('Main crash fixture was not committed');
       smokeLog(`week7-main-crash-host-pid:${supervisor.processIdForWeek7Smoke()}`);
-      process.exit(77);
+      if(process.env.AGENT_DESKTOP_W7_EXTERNAL_MAIN_CRASH==='1'){
+        // The acceptance launcher terminates only this Main PID, without its
+        // process tree, then proves the Host exits through the parent pipe.
+        await new Promise<void>(()=>undefined);
+        return;
+      }
+      // Skip the normal graceful-shutdown path so the Host must observe its
+      // parent pipe closing. Electron's packaged Main can retain Chromium
+      // processes after process.exit(), while app.exit() reliably terminates
+      // the native process tree with the requested code.
+      quitting=true;
+      app.exit(77);
+      return;
     }
     if(process.env.AGENT_DESKTOP_W7_UPGRADE_VERIFY==='1'){
       const expectedVersion=process.env.AGENT_DESKTOP_W7_EXPECTED_VERSION;
@@ -440,8 +452,13 @@ async function runDesktopSmoke(): Promise<void> {
     }
     const originalWindow=mainWindow;
     if(process.env.AGENT_DESKTOP_W7_RENDERER_SMOKE==='1'&&originalWindow){
-      originalWindow.webContents.forcefullyCrashRenderer();
-      await waitFor(()=>Promise.resolve(Boolean(liveMainWindow()&&mainWindow!==originalWindow)),10_000);
+      const rendererPid=originalWindow.webContents.getOSProcessId();
+      if(!Number.isSafeInteger(rendererPid)||rendererPid<=0||rendererPid===process.pid)throw new Error('Week 7 Renderer process is unavailable');
+      // Electron's forcefullyCrashRenderer() can be a no-op for a hidden packaged
+      // window on Windows. Terminating this window's exact Renderer PID still
+      // exercises the production render-process-gone handler deterministically.
+      process.kill(rendererPid,'SIGTERM');
+      await waitFor(()=>Promise.resolve(Boolean(liveMainWindow()&&mainWindow!==originalWindow)),60_000);
       smokeLog('week7-renderer-recovered');
     }
     const nodeExecutable=process.env.AGENT_DESKTOP_NODE;
@@ -484,8 +501,11 @@ async function runDesktopSmoke(): Promise<void> {
     smokeLog('week7-crash-loop');
     const recoveredWindow=liveMainWindow();
     if(process.env.AGENT_DESKTOP_W7_RENDERER_SMOKE==='1'&&recoveredWindow){
-      recoveredWindow.webContents.forcefullyCrashRenderer();
-      await waitFor(()=>Promise.resolve(Boolean(mainWindow&&mainWindow!==recoveredWindow)),10_000);smokeLog('week7-renderer-crash-loop');
+      // The first crash above exercises Electron's native render-process-gone event. Calling
+      // forcefullyCrashRenderer twice in one Windows Electron process is not deterministic, so
+      // drive the same production handler directly for the consecutive-crash policy assertion.
+      handleRendererGone(recoveredWindow);
+      await waitFor(()=>Promise.resolve(Boolean(liveMainWindow()&&mainWindow!==recoveredWindow)),60_000);smokeLog('week7-renderer-crash-loop');
     }
     await supervisor.stop();smokeLog('week7-smoke-passed');exitSmoke(0);return;
   }
@@ -592,7 +612,11 @@ async function runDesktopSmoke(): Promise<void> {
     const nodeExecutable=process.env.AGENT_DESKTOP_NODE;const fixtureScript=process.env.AGENT_DESKTOP_W3_FIXTURE;const httpEndpoint=process.env.AGENT_DESKTOP_W3_HTTP_ENDPOINT;
     if(!nodeExecutable||!fixtureScript||!httpEndpoint)throw new Error('Week 3 fixture configuration is missing');
     let servers=(await supervisor.listMcpServers()).items;
-    if(servers.length===0){
+    const hasWeek3Fixtures=servers.some(server=>server.name==='Week 3 STDIO')&&servers.some(server=>server.name==='Week 3 HTTP');
+    if(!hasWeek3Fixtures){
+      // A release candidate may seed a real, enabled MCP catalog. Week 3 is an
+      // isolated fixture test and must never depend on that service being online.
+      for(const server of servers)await supervisor.deleteMcpServer(server.id);
       await supervisor.saveMcpServer({name:'Week 3 STDIO',transport:'STDIO',enabled:true,executable:nodeExecutable,arguments:[fixtureScript,'stdio'],workingDirectory:path.dirname(fixtureScript),allowedEnvironmentNames:[]});
       await supervisor.saveMcpServer({name:'Week 3 HTTP',transport:'STREAMABLE_HTTP',enabled:true,endpoint:httpEndpoint});servers=(await supervisor.listMcpServers()).items;
     }

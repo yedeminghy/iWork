@@ -14,19 +14,27 @@ assert.match(candidate??'',/^[0-9a-f]{64}$/,'--candidate must be a SHA-256 hex d
 assert.ok(evidenceRoot,'--evidence is required');
 
 const loaded=[];
+const requirePassed=(value,label)=>assert.equal(value,'passed',`${label} must be passed`);
+let candidateDelta=null;
 const read=name=>{
   const value=JSON.parse(readFileSync(path.join(evidenceRoot,name),'utf8'));
   assert.equal(value.schemaVersion,1,`${name}: unsupported schema`);
-  assert.equal(value.candidateSha256?.toLowerCase(),candidate,`${name}: candidate mismatch`);
+  const evidenceCandidate=value.candidateSha256?.toLowerCase();
+  if(evidenceCandidate!==candidate){
+    assert.ok(candidateDelta,`${name}: candidate mismatch`);
+    assert.equal(evidenceCandidate,candidateDelta.sourceCandidateSha256,`${name}: source candidate mismatch`);
+    const inherited=candidateDelta.inheritedEvidence.find(item=>item.name===name);
+    assert.ok(inherited,`${name}: evidence inheritance is not approved`);
+    assert.equal(inherited.sha256,fileSha256(name),`${name}: inherited evidence changed after adjudication`);
+  }
   scanSafe(value,name);
   loaded.push(name);
   return value;
 };
-const requirePassed=(value,label)=>assert.equal(value,'passed',`${label} must be passed`);
-
 let recommendation='NO_GO';
 let soakAdjudicated=false;
 try{
+  candidateDelta=loadCandidateDelta();
   const week8=read('week8-verification.json');
   requirePassed(week8.result,'Week 8 verification');
   assert.equal(week8.releaseGate,'week8-complete','Week 8 full inherited gate is required');
@@ -70,9 +78,9 @@ try{
 
     let productionReady=false;
     try{const production=read('production-readiness.json');productionReady=production.status==='passed'&&production.allClosed===true&&production.signed===true&&production.channel==='production';}catch(error){if(error?.code!=='ENOENT')throw error;}
-    recommendation=productionReady&&!soakAdjudicated?'GO_PRODUCTION':'GO_INTERNAL_ONLY';
+    recommendation=productionReady&&!soakAdjudicated&&!candidateDelta?'GO_PRODUCTION':'GO_INTERNAL_ONLY';
   }
-  const result={schemaVersion:1,result:'passed',profile,candidateSha256:candidate,releaseRecommendation:recommendation,soakAdjudicated,validatedFiles:loaded};
+  const result={schemaVersion:1,result:'passed',profile,candidateSha256:candidate,releaseRecommendation:recommendation,soakAdjudicated,candidateDeltaAdjudicated:Boolean(candidateDelta),validatedFiles:loaded};
   process.stdout.write(JSON.stringify(result)+'\n');
 }catch(error){
   process.stdout.write(JSON.stringify({schemaVersion:1,result:'failed',profile,candidateSha256:candidate,releaseRecommendation:'NO_GO',errorCode:'WEEK9_EVIDENCE_INVALID',message:safeMessage(error)})+'\n');
@@ -141,6 +149,51 @@ function slotCount(completedTurns,slot){
 }
 
 function fileSha256(name){return createHash('sha256').update(readFileSync(path.join(evidenceRoot,name))).digest('hex');}
+
+function loadCandidateDelta(){
+  let value;
+  try{value=JSON.parse(readFileSync(path.join(evidenceRoot,'candidate-delta-adjudication.json'),'utf8'));}
+  catch(error){if(error?.code==='ENOENT')return null;throw error;}
+  assert.equal(value.schemaVersion,1,'candidate-delta-adjudication.json: unsupported schema');
+  assert.equal(value.candidateSha256?.toLowerCase(),candidate,'Candidate delta target mismatch');
+  assert.match(value.sourceCandidateSha256??'',/^[0-9a-f]{64}$/,'Candidate delta source must be a SHA-256 digest');
+  assert.notEqual(value.sourceCandidateSha256,candidate,'Candidate delta must link two distinct candidates');
+  requirePassed(value.status,'Candidate delta adjudication');
+  assert.equal(value.decision,'INHERIT_CONTROLLED_BETA_EVIDENCE_FOR_TEST_AND_RELEASE_HARDENING_DELTA');
+  assert.equal(value.scope,'CONTROLLED_BETA_INTERNAL_ONLY');
+  assert.equal(value.productionRequiresFreshEvidence,true);
+  assert.equal(value.productionBehaviorChanged,false);
+  assert.equal(value.featureBehaviorChanged,false);
+  assert.equal(value.releaseHardeningChanged,true);
+  assert.match(value.sourceRevision??'',/^source-sha256:[0-9a-f]{64}$/);
+  assert.match(value.targetRevision??'',/^source-sha256:[0-9a-f]{64}$/);
+  assert.notEqual(value.sourceRevision,value.targetRevision);
+  const allowedPaths=new Set([
+    'agent-mcp/src/main/java/dev/agentdesktop/mcp/SdkMcpClientManager.java',
+    'agent-mcp/src/main/java/dev/agentdesktop/mcp/RestrictedStdioClientTransport.java',
+    'agent-mcp/src/test/java/dev/agentdesktop/mcp/McpTransportIntegrationTest.java',
+    'agent-runtime/src/test/java/dev/agentdesktop/runtime/skill/SkillScriptAdapterTest.java',
+    'agent-host/src/test/java/dev/agentdesktop/host/TurnCoordinatorTest.java',
+    'desktop-shell/src/main.ts',
+    'packaging/electron-builder.yml',
+    'scripts/generate-week9-compatibility-automation.mjs',
+    'scripts/generate-week9-candidate-delta.mjs',
+    'scripts/verify-week7-electron.mjs',
+    'scripts/verify-week7-install.ps1',
+    'scripts/verify-week7.ps1',
+    'scripts/verify-week9-evidence.mjs',
+    'scripts/verify-week9-evidence.test.mjs'
+  ]);
+  assert.ok(Array.isArray(value.changedPaths)&&value.changedPaths.length>0,'Candidate delta changed paths are required');
+  assert.equal(new Set(value.changedPaths).size,value.changedPaths.length,'Candidate delta changed paths must be unique');
+  for(const changedPath of value.changedPaths)assert.ok(allowedPaths.has(changedPath),`Candidate delta path is outside the controlled hardening scope: ${changedPath}`);
+  const requiredInherited=['soak-adjudication.json','soak-smoke-summary.json','soak-summary.json'];
+  assert.deepEqual([...value.inheritedEvidence].map(item=>item.name).sort(),requiredInherited);
+  for(const item of value.inheritedEvidence){assert.match(item.sha256??'',/^[0-9a-f]{64}$/);}
+  scanSafe(value,'candidate-delta-adjudication.json');
+  loaded.push('candidate-delta-adjudication.json');
+  return value;
+}
 
 function scanSafe(value,label){
   const visit=(item,key='')=>{

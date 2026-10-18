@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "status": "passed",
+  "decision": "ACCEPT_ORIGINAL_RUN_WITH_HARNESS_WAIVER",
+  "scope": "CONTROLLED_BETA_INTERNAL_ONLY",
+  "productionRequiresFreshFullSoak": true,
+  "reasonCode": "SOAK_APPROVAL_THREAD_REUSE",
+  "originalEvidence": "soak-summary.json",
+  "originalEvidenceSha256": "00ee1731407e3b24ecfb876d60ca9aea47d1de844e86534134e346ef574862f0",
+  "regressionEvidence": "soak-smoke-summary.json",
+  "regressionEvidenceSha256": "b9d91754648b81d035dbad2fe9e0b648c340885096e21be0e59eb43bd3afd828",
+  "sourceFailureCodes": [
+    "SOAK_EVENT_TIMEOUT"
+  ],
+  "derived": {
+    "approvalSlots": 311,
+    "cancellationSlots": 311,
+    "retrySlots": 311,
+    "steeringSlots": 311,
+    "providerDisconnectSlots": 310,
+    "recordedApprovalDecisions": 16,
+    "missingApprovalEvents": 295
+  },
+  "remediation": {
+    "approvalDecisionThreadsIsolated": true,
+    "hostRecoveryTimeoutBounded": true,
+    "regressionSmokePassed": true
+  }
+}

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -9,6 +10,7 @@ const directory=mkdtempSync(path.join(os.tmpdir(),'agent-week9-evidence-'));
 const script=path.join(path.dirname(fileURLToPath(import.meta.url)),'verify-week9-evidence.mjs');
 const adjudicator=path.join(path.dirname(fileURLToPath(import.meta.url)),'adjudicate-week9-soak.mjs');
 const candidate='a'.repeat(64);
+const sourceCandidate='b'.repeat(64);
 const write=(name,value)=>writeFileSync(path.join(directory,name),JSON.stringify({schemaVersion:1,candidateSha256:candidate,...value}));
 
 try{
@@ -64,17 +66,47 @@ try{
   write('soak-summary.json',failedThreshold);
   assert.notEqual(runAdjudicator().status,0,'A failed stability threshold must not be adjudicated');
 
+  write('soak-summary.json',fullSoak('failed'));
+  write('soak-smoke-summary.json',regressionSmoke());
+  assert.equal(runAdjudicator().status,0);
+  for(const name of ['soak-summary.json','soak-smoke-summary.json']){
+    const inherited=JSON.parse(readFileSync(path.join(directory,name),'utf8'));
+    inherited.candidateSha256=sourceCandidate;
+    writeFileSync(path.join(directory,name),JSON.stringify(inherited));
+  }
+  const inheritedAdjudication=JSON.parse(readFileSync(path.join(directory,'soak-adjudication.json'),'utf8'));
+  inheritedAdjudication.candidateSha256=sourceCandidate;
+  inheritedAdjudication.originalEvidenceSha256=fileSha256('soak-summary.json');
+  inheritedAdjudication.regressionEvidenceSha256=fileSha256('soak-smoke-summary.json');
+  writeFileSync(path.join(directory,'soak-adjudication.json'),JSON.stringify(inheritedAdjudication));
+  writeCandidateDelta();
+  const deltaAccepted=run('beta');
+  assert.equal(deltaAccepted.status,0,deltaAccepted.stderr||deltaAccepted.stdout);
+  assert.equal(JSON.parse(deltaAccepted.stdout).candidateDeltaAdjudicated,true);
+  assert.equal(JSON.parse(deltaAccepted.stdout).releaseRecommendation,'GO_INTERNAL_ONLY');
+  const changedDelta=JSON.parse(readFileSync(path.join(directory,'candidate-delta-adjudication.json'),'utf8'));
+  changedDelta.productionBehaviorChanged=true;
+  writeFileSync(path.join(directory,'candidate-delta-adjudication.json'),JSON.stringify(changedDelta));
+  assert.notEqual(run('beta').status,0,'A production behavior delta must not inherit evidence');
+
   write('soak-summary.json',fullSoak('passed'));
   write('security-scan.json',{status:'passed',highRiskFindings:0,sentinelScanPassed:true,secret:'sk-should-never-be-evidence',boundaries:{}});
   const rejected=run('beta');
   assert.notEqual(rejected.status,0);
   assert.equal(JSON.parse(rejected.stdout).releaseRecommendation,'NO_GO');
-  process.stdout.write(JSON.stringify({schemaVersion:1,result:'passed',checks:['complete-beta-evidence','internal-only-recommendation','adjudicated-soak-accepted','adjudication-source-tamper-rejected','production-adjudication-rejected','unrelated-failure-rejected','failed-threshold-rejected','sensitive-evidence-rejected']})+'\n');
+  process.stdout.write(JSON.stringify({schemaVersion:1,result:'passed',checks:['complete-beta-evidence','internal-only-recommendation','adjudicated-soak-accepted','adjudication-source-tamper-rejected','production-adjudication-rejected','unrelated-failure-rejected','failed-threshold-rejected','controlled-hardening-delta-accepted','production-behavior-delta-rejected','sensitive-evidence-rejected']})+'\n');
 }finally{rmSync(directory,{recursive:true,force:true});}
 
 function environment(environmentId,kind){return {environmentId,kind,lifecycle:{freshInstall:true,firstStart:true,upgrade:true,uninstallRetention:true,reinstallRecovery:true}};}
 function run(profile){return spawnSync(process.execPath,[script,`--profile=${profile}`,`--evidence=${directory}`,`--candidate=${candidate}`],{encoding:'utf8'});}
 function runAdjudicator(){return spawnSync(process.execPath,[adjudicator,candidate,directory],{encoding:'utf8'});}
+
+function writeCandidateDelta(){
+  const inheritedEvidence=['soak-adjudication.json','soak-smoke-summary.json','soak-summary.json'].map(name=>({name,sha256:fileSha256(name)}));
+  write('candidate-delta-adjudication.json',{sourceCandidateSha256:sourceCandidate,status:'passed',decision:'INHERIT_CONTROLLED_BETA_EVIDENCE_FOR_TEST_AND_RELEASE_HARDENING_DELTA',scope:'CONTROLLED_BETA_INTERNAL_ONLY',productionRequiresFreshEvidence:true,productionBehaviorChanged:false,featureBehaviorChanged:false,releaseHardeningChanged:true,sourceRevision:`source-sha256:${'c'.repeat(64)}`,targetRevision:`source-sha256:${'d'.repeat(64)}`,changedPaths:['desktop-shell/src/main.ts','scripts/verify-week7.ps1','scripts/verify-week9-evidence.mjs','scripts/verify-week9-evidence.test.mjs'],inheritedEvidence});
+}
+
+function fileSha256(name){return createHash('sha256').update(readFileSync(path.join(directory,name))).digest('hex');}
 
 function fullSoak(status){
   return {status,developmentOnly:false,durationSeconds:28_800,completedTurns:500,

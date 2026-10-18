@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "status": "passed",
+  "basis": "WEEK8_NO_SKIP_GATE_AND_WEEK9_STATIC_CONTRACTS",
+  "skillScopes": [
+    "BUILTIN",
+    "USER",
+    "WORKSPACE",
+    "MANAGED_IMPORT"
+  ],
+  "interpreters": [
+    "POWERSHELL",
+    "PYTHON",
+    "JAVASCRIPT"
+  ],
+  "uiStatus": "passed",
+  "providerFixtures": [
+    "deepseek",
+    "qwen"
+  ],
+  "mcpTransports": [
+    "STDIO",
+    "STREAMABLE_HTTP"
+  ],
+  "inheritedChecks": [
+    "maven-clean-verify",
+    "npm-ci",
+    "typecheck",
+    "desktop-build",
+    "week8-and-week9-contracts",
+    "artifact-preview-security",
+    "week7-to-week3-regression-source-candidate",
+    "week7-target-delta-static-verification",
+    "week8-a01-a14",
+    "week8-oa01-oa10",
+    "real-provider-minimum",
+    "two-hour-soak",
+    "controlled-beta"
+  ]
+}

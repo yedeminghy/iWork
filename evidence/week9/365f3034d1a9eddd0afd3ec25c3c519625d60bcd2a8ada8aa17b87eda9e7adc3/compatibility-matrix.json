@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "status": "passed",
+  "providers": [
+    {
+      "providerId": "deepseek",
+      "fixtureStatus": "passed",
+      "realSampleStatus": "passed",
+      "evidenceId": "ev_b9af71d0c73d"
+    },
+    {
+      "providerId": "qwen",
+      "fixtureStatus": "passed",
+      "realSampleStatus": "passed",
+      "evidenceId": "ev_fa50dead907e"
+    }
+  ],
+  "mcp": [
+    {
+      "transport": "STDIO",
+      "fixtureStatus": "passed",
+      "realSampleStatus": "passed",
+      "replayedCalls": 0,
+      "evidenceId": "ev_9284b574d84b"
+    },
+    {
+      "transport": "STREAMABLE_HTTP",
+      "fixtureStatus": "passed",
+      "realSampleStatus": "passed",
+      "replayedCalls": 0,
+      "evidenceId": "ev_3c35cb5cf88a"
+    }
+  ],
+  "skillScopes": [
+    "BUILTIN",
+    "USER",
+    "WORKSPACE",
+    "MANAGED_IMPORT"
+  ],
+  "interpreters": [
+    "POWERSHELL",
+    "PYTHON",
+    "JAVASCRIPT"
+  ],
+  "uiStatus": "passed"
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "week": 9,
+  "profile": "beta",
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "sourceRevision": "source-sha256:269d7ca9ec7182b8f8d6682bf43bd05e67bf34c7ea79c471ba6f8d9e1755905a",
+  "result": "passed",
+  "releaseRecommendation": "GO_INTERNAL_ONLY",
+  "scope": "CONTROLLED_BETA_INTERNAL_ONLY",
+  "source": "COMPOSITE_EVIDENCE_GATE_WITH_CONTROLLED_DELTA_AND_SOAK_ADJUDICATION",
+  "evidenceVerifierExitCode": 0,
+  "candidateDeltaAdjudicated": true,
+  "soakAdjudicated": true,
+  "freshFullRuntimeGateExecuted": false,
+  "fullRuntimeGateDisposition": "NOT_REPEATED_BY_USER_APPROVED_COMPOSITE_ADJUDICATION",
+  "productionRequiresFreshEvidence": true,
+  "checks": [
+    "candidate-sha256-binding",
+    "week7-source-runtime-and-target-static-delta",
+    "week8-a01-a14-and-oa01-oa10",
+    "deepseek-and-qwen-user-evidence",
+    "stdio-and-streamable-http-mcp-user-evidence",
+    "skill-boundary-user-evidence",
+    "three-environment-windows-install-matrix",
+    "ten-tester-beta-feedback",
+    "p0-p1-zero",
+    "security-scan",
+    "eight-hour-soak-adjudication",
+    "evidence-integrity"
+  ],
+  "limitations": [
+    "unsigned candidate",
+    "not approved for production",
+    "production must rerun a fresh full runtime gate and soak without evidence inheritance"
+  ]
+}

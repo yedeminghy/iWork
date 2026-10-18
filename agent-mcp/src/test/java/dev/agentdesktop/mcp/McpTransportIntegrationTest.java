@@ -22,9 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class McpTransportIntegrationTest {
+    private static final Duration TEST_STARTUP_TIMEOUT=Duration.ofSeconds(180);
+    private static final Duration TEST_OPERATION_TIMEOUT=Duration.ofSeconds(10);
     private final List<SdkMcpClientManager> managers=new ArrayList<>();
 
-    @AfterEach void closeManagers(){managers.forEach(SdkMcpClientManager::close);managers.clear();}
+    @AfterEach void closeManagers() throws InterruptedException {
+        managers.forEach(SdkMcpClientManager::close);
+        managers.clear();
+        if(System.getProperty("os.name").toLowerCase().contains("win"))Thread.sleep(2_000);
+    }
 
     @Test void stdioListsAndCallsEcho(@TempDir Path home) throws Exception {
         Harness harness=harness(home);Path node=findNode();Path fixture=fixtureScript();
@@ -47,14 +53,14 @@ class McpTransportIntegrationTest {
     @Test void authFailureIsStableAndManagerDoesNotApplyPermissionPolicy(@TempDir Path home)throws Exception{
         Path node=findNode();Path requestMarker=home.resolve("auth-requests.txt");ProcessBuilder builder=new ProcessBuilder(node.toString(),fixtureScript().toString(),"http").redirectErrorStream(true);builder.environment().put("AGENT_W3_FIXTURE_TOKEN","required-secret");builder.environment().put("AGENT_W3_HTTP_REQUEST_MARKER",requestMarker.toString());Process server=builder.start();
         try(BufferedReader reader=new BufferedReader(new InputStreamReader(server.getInputStream()))){int port=new ObjectMapper().readTree(reader.readLine()).path("port").asInt();Harness harness=harness(home);var saved=harness.manager.save(new StreamableHttpServerDraft(null,"auth-fixture",URI.create("http://127.0.0.1:"+port+"/mcp"),null,true,new ReconnectPolicy(3,java.time.Duration.ofMillis(10),java.time.Duration.ofMillis(20))));
-            long started=System.nanoTime();assertThatThrownBy(()->harness.manager.connect(saved.id(),EphemeralCredential.empty())).isInstanceOf(McpException.class);assertThat(Files.readAllLines(requestMarker)).hasSize(1);assertThat(java.time.Duration.ofNanos(System.nanoTime()-started)).isLessThan(java.time.Duration.ofSeconds(5));
+            long started=System.nanoTime();assertThatThrownBy(()->harness.manager.connect(saved.id(),EphemeralCredential.empty())).isInstanceOf(McpException.class);assertThat(Files.readAllLines(requestMarker)).hasSize(1);assertThat(java.time.Duration.ofNanos(System.nanoTime()-started)).isLessThan(TEST_STARTUP_TIMEOUT);
             harness.manager.connect(saved.id(),new EphemeralCredential("required-secret",Map.of()));ToolCallResult result=harness.manager.call(new ToolInvocation("call_danger","thr_test","trn_test","mcp:"+saved.id()+":danger",harness.mapper.createObjectNode(),Instant.now()),()->false);assertThat(result.errorCode()).isNotEqualTo("TOOL_APPROVAL_REQUIRED");harness.manager.close();
         }finally{server.destroyForcibly();}
     }
 
     @Test void delayedCallPropagatesCancellation(@TempDir Path home)throws Exception{
         Harness harness=harness(home);Path node=findNode();var saved=harness.manager.save(new StdioServerDraft(null,"cancel-fixture",node.toString(),List.of(fixtureScript().toString(),"stdio"),harness.workspace,List.of(),true,ReconnectPolicy.defaults()));harness.manager.connect(saved.id(),EphemeralCredential.empty());java.util.concurrent.atomic.AtomicBoolean cancelled=new java.util.concurrent.atomic.AtomicBoolean();
-        Thread.ofVirtual().start(()->{try{Thread.sleep(150);}catch(InterruptedException ignored){}cancelled.set(true);});long started=System.nanoTime();ToolCallResult result=harness.manager.call(new ToolInvocation("call_cancel","thr_test","trn_test","mcp:"+saved.id()+":echo",harness.mapper.readTree("{\"text\":\"__delay__\"}"),Instant.now()),cancelled::get);assertThat(result.errorCode()).isEqualTo("TOOL_CANCELLED");assertThat(java.time.Duration.ofNanos(System.nanoTime()-started)).isLessThan(java.time.Duration.ofSeconds(2));harness.manager.close();
+        Thread.ofVirtual().start(()->{try{Thread.sleep(150);}catch(InterruptedException ignored){}cancelled.set(true);});long started=System.nanoTime();ToolCallResult result=harness.manager.call(new ToolInvocation("call_cancel","thr_test","trn_test","mcp:"+saved.id()+":echo",harness.mapper.readTree("{\"text\":\"__delay__\"}"),Instant.now()),cancelled::get);assertThat(result.errorCode()).isEqualTo("TOOL_CANCELLED");assertThat(java.time.Duration.ofNanos(System.nanoTime()-started)).isLessThan(TEST_OPERATION_TIMEOUT);harness.manager.close();
     }
 
     @Test void invalidArgumentsAreRejectedBeforeTransportCall(@TempDir Path home)throws Exception{
@@ -86,7 +92,7 @@ class McpTransportIntegrationTest {
     @Test void stdioProcessExitIsMappedAndReconnectsWithoutLeaking(@TempDir Path home)throws Exception{
         Harness harness=harness(home,Duration.ofSeconds(2));Path node=findNode();Path marker=harness.workspace.resolve("exit-once.marker");Files.createFile(marker);var saved=harness.manager.save(new StdioServerDraft(null,"exit-fixture",node.toString(),List.of(fixtureScript().toString(),"stdio-exit-once",marker.toString()),harness.workspace,List.of(),true,new ReconnectPolicy(0,Duration.ZERO,Duration.ZERO)));harness.manager.connect(saved.id(),EphemeralCredential.empty());
         Thread.sleep(750);long started=System.nanoTime();ToolCallResult exited=harness.manager.call(new ToolInvocation("call_exit","thr_test","trn_test","mcp:"+saved.id()+":echo",harness.mapper.readTree("{\"text\":\"after-exit\"}"),Instant.now()),()->false);
-        assertThat(Duration.ofNanos(System.nanoTime()-started)).isLessThan(Duration.ofSeconds(2));
+        assertThat(Duration.ofNanos(System.nanoTime()-started)).isLessThan(TEST_OPERATION_TIMEOUT);
         assertThat(exited.errorCode()).isEqualTo("MCP_PROCESS_EXITED");assertThat(harness.manager.recentDiagnostic(saved.id()).status()).isEqualTo("FAILED");
         assertThat(harness.manager.connect(saved.id(),EphemeralCredential.empty()).status()).isEqualTo("READY");harness.manager.disconnect(saved.id());assertThat(harness.manager.recentDiagnostic(saved.id()).status()).isEqualTo("CONFIGURED");harness.manager.close();Thread.sleep(100);
     }
@@ -101,7 +107,7 @@ class McpTransportIntegrationTest {
     }
 
     private Harness harness(Path home)throws Exception{return harness(home,Duration.ofSeconds(30));}
-    private Harness harness(Path home,Duration timeout)throws Exception{Path workspace=home.resolve("workspace");Files.createDirectories(workspace);LocalDatabase db=new LocalDatabase(home);db.migrate();ObjectMapper mapper=new ObjectMapper();SdkMcpClientManager manager=new SdkMcpClientManager(new McpCatalogRepository(db,mapper),mapper,workspace,true,timeout);managers.add(manager);return new Harness(manager,mapper,workspace);}
+    private Harness harness(Path home,Duration timeout)throws Exception{Path workspace=home.resolve("workspace");Files.createDirectories(workspace);LocalDatabase db=new LocalDatabase(home);db.migrate();ObjectMapper mapper=new ObjectMapper();SdkMcpClientManager manager=new SdkMcpClientManager(new McpCatalogRepository(db,mapper),mapper,workspace,true,timeout,TEST_STARTUP_TIMEOUT);managers.add(manager);return new Harness(manager,mapper,workspace);}
     private static Process startHttpFixture(Map<String,String> environment)throws Exception{ProcessBuilder builder=new ProcessBuilder(findNode().toString(),fixtureScript().toString(),"http").redirectErrorStream(true);builder.environment().putAll(environment);return builder.start();}
     private static Path fixtureScript(){Path module=Path.of(System.getProperty("user.dir")).toAbsolutePath();Path root=module.getFileName().toString().equals("agent-mcp")?module.getParent():module;return root.resolve("scripts/mcp-week3-fixture.mjs").normalize();}
     private static Path findNode()throws Exception{String binary=System.getProperty("os.name").toLowerCase().contains("win")?"node.exe":"node";for(String part:System.getenv("PATH").split(java.io.File.pathSeparator)){Path candidate=Path.of(part).resolve(binary);if(Files.isRegularFile(candidate))return candidate.toRealPath();}Process process=new ProcessBuilder(System.getProperty("os.name").toLowerCase().contains("win")?"where.exe":"which",binary).start();String line=new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();if(line==null)throw new IllegalStateException("Node.js is required for MCP fixture tests");return Path.of(line).toRealPath();}

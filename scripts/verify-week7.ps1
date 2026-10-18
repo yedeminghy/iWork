@@ -29,7 +29,10 @@ try{
   }
   & node (Join-Path $PSScriptRoot 'verify-week7-static.mjs');if($LASTEXITCODE-ne 0){throw 'Static Week 7 checks failed'};$summary.checks+='release-fail-closed'
   & node (Join-Path $PSScriptRoot 'verify-parent-liveness.mjs');if($LASTEXITCODE-ne 0){throw 'Parent liveness verification failed'};$summary.checks+='parent-liveness'
-  & (Join-Path $PSScriptRoot 'verify-week7-runtime.ps1') -Executable (Join-Path $output 'win-unpacked\agent-desktop.exe');if($LASTEXITCODE-ne 0){throw 'Packaged recovery verification failed'}
+  $unpacked=Join-Path $output 'win-unpacked'
+  $runtimeExecutables=@(Get-ChildItem -LiteralPath $unpacked -File -Filter '*.exe' | Where-Object { $_.Name -notmatch '^(?:unins|uninstall)' })
+  if($runtimeExecutables.Count-ne 1){throw "Expected exactly one packaged application executable, found $($runtimeExecutables.Count)"}
+  & (Join-Path $PSScriptRoot 'verify-week7-runtime.ps1') -Executable $runtimeExecutables[0].FullName;if($LASTEXITCODE-ne 0){throw 'Packaged recovery verification failed'}
   $summary.checks+=@('packaged-renderer','host-recovery','main-recovery','zero-replay','crash-loop')
 
   $release=Get-Content -LiteralPath (Join-Path $output 'release-artifacts.json') -Raw -Encoding UTF8|ConvertFrom-Json

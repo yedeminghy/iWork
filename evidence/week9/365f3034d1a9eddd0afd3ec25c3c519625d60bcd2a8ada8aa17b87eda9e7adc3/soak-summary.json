@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "status": "failed",
+  "developmentOnly": false,
+  "durationSeconds": 28841,
+  "completedTurns": 6217,
+  "scenarios": {
+    "chat": 2483,
+    "mcpStdio": 623,
+    "mcpHttp": 622,
+    "skillScripts": {
+      "powershell": 311,
+      "python": 311,
+      "javascript": 311
+    },
+    "approvals": {
+      "allowOnce": 2,
+      "allowThread": 8,
+      "deny": 5,
+      "expired": 1
+    },
+    "control": {
+      "cancel": 311,
+      "retry": 311,
+      "steering": 311
+    },
+    "faults": {
+      "providerDisconnect": 310,
+      "mcpExit": 1,
+      "rendererReload": 1,
+      "hostRestart": 1
+    }
+  },
+  "thresholds": {
+    "rssPassed": true,
+    "heapPassed": true,
+    "threadsPassed": true,
+    "handlesPassed": true,
+    "cancellationPassed": true,
+    "approvalResumePassed": true,
+    "databaseIntegrityPassed": true,
+    "terminalUniquenessPassed": true
+  },
+  "finalCounters": {
+    "activeTurns": 0,
+    "pendingApprovals": 0,
+    "pendingSecretSessions": 0,
+    "sseSubscribers": 0,
+    "ownedChildProcesses": 0
+  },
+  "sampleCount": 91,
+  "failureCodes": [
+    "SOAK_EVENT_TIMEOUT"
+  ]
+}

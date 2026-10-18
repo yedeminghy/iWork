@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "sourceCandidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "status": "passed",
+  "decision": "INHERIT_CONTROLLED_BETA_EVIDENCE_FOR_TEST_AND_RELEASE_HARDENING_DELTA",
+  "scope": "CONTROLLED_BETA_INTERNAL_ONLY",
+  "productionRequiresFreshEvidence": true,
+  "productionBehaviorChanged": false,
+  "featureBehaviorChanged": false,
+  "releaseHardeningChanged": true,
+  "sourceRevision": "source-sha256:edeae5eecb35253e7c688657afd269544af6c319175efedb07f1fd8253481cb1",
+  "targetRevision": "source-sha256:269d7ca9ec7182b8f8d6682bf43bd05e67bf34c7ea79c471ba6f8d9e1755905a",
+  "changedPaths": [
+    "agent-mcp/src/main/java/dev/agentdesktop/mcp/SdkMcpClientManager.java",
+    "agent-mcp/src/main/java/dev/agentdesktop/mcp/RestrictedStdioClientTransport.java",
+    "agent-mcp/src/test/java/dev/agentdesktop/mcp/McpTransportIntegrationTest.java",
+    "agent-runtime/src/test/java/dev/agentdesktop/runtime/skill/SkillScriptAdapterTest.java",
+    "agent-host/src/test/java/dev/agentdesktop/host/TurnCoordinatorTest.java",
+    "desktop-shell/src/main.ts",
+    "packaging/electron-builder.yml",
+    "scripts/generate-week9-compatibility-automation.mjs",
+    "scripts/generate-week9-candidate-delta.mjs",
+    "scripts/verify-week7-electron.mjs",
+    "scripts/verify-week7-install.ps1",
+    "scripts/verify-week7.ps1",
+    "scripts/verify-week9-evidence.mjs",
+    "scripts/verify-week9-evidence.test.mjs"
+  ],
+  "inheritedEvidence": [
+    {
+      "name": "soak-adjudication.json",
+      "sha256": "1538f744fd2d63c7fd805437615a7a92b862b8cbe7a6c3b8d23661d058bc18f4"
+    },
+    {
+      "name": "soak-smoke-summary.json",
+      "sha256": "b9d91754648b81d035dbad2fe9e0b648c340885096e21be0e59eb43bd3afd828"
+    },
+    {
+      "name": "soak-summary.json",
+      "sha256": "00ee1731407e3b24ecfb876d60ca9aea47d1de844e86534134e346ef574862f0"
+    }
+  ]
+}

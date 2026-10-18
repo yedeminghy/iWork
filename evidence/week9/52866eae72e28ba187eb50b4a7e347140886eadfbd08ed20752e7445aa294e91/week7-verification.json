@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "week": 7,
+  "candidateSha256": "52866eae72e28ba187eb50b4a7e347140886eadfbd08ed20752e7445aa294e91",
+  "result": "passed",
+  "releaseGate": "week7-complete",
+  "packageSkipped": false,
+  "installAcceptanceSkipped": false,
+  "source": "AUTOMATED_PACKAGE_RUNTIME_AND_OWNER_INSTALL_MATRIX_DELTA_ADJUDICATION",
+  "scope": "CONTROLLED_BETA_INTERNAL_ONLY",
+  "productionRequiresFreshEvidence": true,
+  "automated": {
+    "packageContent": "passed",
+    "tamperResistance": "passed",
+    "parentLiveness": "passed",
+    "packagedRuntimeRecovery": "passed"
+  },
+  "runtimeAttempts": {
+    "finalCandidateFirstAttempt": "passed",
+    "candidateChangedAfterPass": false,
+    "rendererInjection": "EXACT_RENDERER_PID_TERMINATION"
+  },
+  "installAcceptance": {
+    "status": "passed",
+    "basis": "THREE_ENVIRONMENT_OWNER_CONFIRMED_MATRIX",
+    "environmentCount": 3,
+    "localAutomation": "inconclusive-nsis-cleanup",
+    "candidateDeltaAdjudicated": true
+  },
+  "checks": [
+    "candidate-package",
+    "release-fail-closed",
+    "parent-liveness",
+    "packaged-renderer",
+    "host-recovery",
+    "main-recovery",
+    "zero-replay",
+    "crash-loop",
+    "current-user-install",
+    "upgrade-retention",
+    "safe-uninstall",
+    "reinstall-recovery"
+  ]
+}

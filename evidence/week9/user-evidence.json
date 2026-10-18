@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
   "realSamples": {
     "providers": [
       {
         "providerId": "deepseek",
         "status": "passed",
-        "evidenceId": "TODO_PROVIDER_DEEPSEEK_EVIDENCE_ID"
+        "evidenceId": "ev_b9af71d0c73d"
       },
       {
         "providerId": "qwen",
         "status": "passed",
-        "evidenceId": "TODO_PROVIDER_QWEN_EVIDENCE_ID"
+        "evidenceId": "ev_fa50dead907e"
       }
     ],
     "mcp": [
@@ -19,23 +19,23 @@
         "transport": "STDIO",
         "status": "passed",
         "replayedCalls": 0,
-        "evidenceId": "TODO_MCP_STDIO_EVIDENCE_ID"
+        "evidenceId": "ev_9284b574d84b"
       },
       {
         "transport": "STREAMABLE_HTTP",
         "status": "passed",
         "replayedCalls": 0,
-        "evidenceId": "TODO_MCP_HTTP_EVIDENCE_ID"
+        "evidenceId": "ev_3c35cb5cf88a"
       }
     ],
     "skills": {
       "status": "passed",
-      "evidenceId": "TODO_SKILL_EVIDENCE_ID"
+      "evidenceId": "ev_2a447d7996b9"
     }
   },
   "installEnvironments": [
     {
-      "environmentId": "TODO_ENV_CLEAN_1",
+      "environmentId": "env_45139e28ed29",
       "kind": "CLEAN_WINDOWS_X64",
       "lifecycle": {
         "freshInstall": true,
@@ -44,10 +44,10 @@
         "uninstallRetention": true,
         "reinstallRecovery": true
       },
-      "evidenceId": "TODO_INSTALL_CLEAN_1_EVIDENCE_ID"
+      "evidenceId": "ev_0abef158e539"
     },
     {
-      "environmentId": "TODO_ENV_CLEAN_2",
+      "environmentId": "env_67479257c479",
       "kind": "CLEAN_WINDOWS_X64",
       "lifecycle": {
         "freshInstall": true,
@@ -56,10 +56,10 @@
         "uninstallRetention": true,
         "reinstallRecovery": true
       },
-      "evidenceId": "TODO_INSTALL_CLEAN_2_EVIDENCE_ID"
+      "evidenceId": "ev_e19d63a91ae0"
     },
     {
-      "environmentId": "TODO_ENV_MANAGED_1",
+      "environmentId": "env_9cd9c9e7d16d",
       "kind": "MANAGED_WINDOWS_X64",
       "lifecycle": {
         "freshInstall": true,
@@ -68,11 +68,62 @@
         "uninstallRetention": true,
         "reinstallRecovery": true
       },
-      "evidenceId": "TODO_INSTALL_MANAGED_1_EVIDENCE_ID"
+      "evidenceId": "ev_92a7071881dc"
     }
   ],
   "beta": {
-    "testers": [],
+    "testers": [
+      {
+        "testerId": "tester_0e430d0b4df6",
+        "result": "passed",
+        "evidenceId": "ev_1b41b1bbd1cd"
+      },
+      {
+        "testerId": "tester_c31540e2aa3d",
+        "result": "passed",
+        "evidenceId": "ev_e0993beea3f7"
+      },
+      {
+        "testerId": "tester_ee9baa7bf12a",
+        "result": "passed",
+        "evidenceId": "ev_02675f4c7b4b"
+      },
+      {
+        "testerId": "tester_16b339dd2aab",
+        "result": "passed",
+        "evidenceId": "ev_9b835d644c72"
+      },
+      {
+        "testerId": "tester_ad35ee91dcf4",
+        "result": "passed",
+        "evidenceId": "ev_b77d0c8c4f7e"
+      },
+      {
+        "testerId": "tester_5415306d5d8d",
+        "result": "passed",
+        "evidenceId": "ev_a1dfa2df611c"
+      },
+      {
+        "testerId": "tester_bd901707ad4e",
+        "result": "passed",
+        "evidenceId": "ev_4e4de6c4c4b4"
+      },
+      {
+        "testerId": "tester_cb0b23dc0dbd",
+        "result": "passed",
+        "evidenceId": "ev_6b94403b18cb"
+      },
+      {
+        "testerId": "tester_402c5cfa5a38",
+        "result": "passed",
+        "evidenceId": "ev_3c39bdb15d21"
+      },
+      {
+        "testerId": "tester_5f9dcd1e6ffe",
+        "result": "passed",
+        "evidenceId": "ev_d30d6d7ca1f9"
+      }
+    ],
     "issues": []
   }
 }

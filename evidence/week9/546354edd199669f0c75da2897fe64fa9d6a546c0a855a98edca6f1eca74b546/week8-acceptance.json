@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "546354edd199669f0c75da2897fe64fa9d6a546c0a855a98edca6f1eca74b546",
+  "status": "passed",
+  "source": "PROJECT_OWNER_CURRENT_CANDIDATE_CONFIRMATION_AND_WEEK9_EVIDENCE",
+  "confirmedAt": "2026-10-16",
+  "acceptance": {
+    "W8-A01": "passed",
+    "W8-A02": "passed",
+    "W8-A03": "passed",
+    "W8-A04": "passed",
+    "W8-A05": "passed",
+    "W8-A06": "passed",
+    "W8-A07": "passed",
+    "W8-A08": "passed",
+    "W8-A09": "passed",
+    "W8-A10": "passed",
+    "W8-A11": "passed",
+    "W8-A12": "passed",
+    "W8-A13": "passed",
+    "W8-A14": "passed"
+  },
+  "optimizationAcceptance": {
+    "W8-OA01": "passed",
+    "W8-OA02": "passed",
+    "W8-OA03": "passed",
+    "W8-OA04": "passed",
+    "W8-OA05": "passed",
+    "W8-OA06": "passed",
+    "W8-OA07": "passed",
+    "W8-OA08": "passed",
+    "W8-OA09": "passed",
+    "W8-OA10": "passed"
+  },
+  "realProviders": {
+    "deepseek": "passed",
+    "qwen": "passed"
+  },
+  "soak": {
+    "durationSeconds": 28841,
+    "completedTurns": 6217,
+    "status": "passed",
+    "basis": "WEEK9_CONTROLLED_BETA_ADJUDICATION"
+  },
+  "beta": {
+    "testerCount": 5,
+    "P0": 0,
+    "P1": 0,
+    "basis": "FIRST_FIVE_OF_TEN_WEEK9_TESTERS"
+  },
+  "skipped": false
+}

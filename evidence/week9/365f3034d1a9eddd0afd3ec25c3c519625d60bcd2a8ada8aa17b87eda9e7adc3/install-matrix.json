@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "status": "passed",
+  "skipped": false,
+  "environments": [
+    {
+      "environmentId": "env_45139e28ed29",
+      "kind": "CLEAN_WINDOWS_X64",
+      "lifecycle": {
+        "freshInstall": true,
+        "firstStart": true,
+        "upgrade": true,
+        "uninstallRetention": true,
+        "reinstallRecovery": true
+      },
+      "evidenceId": "ev_0abef158e539"
+    },
+    {
+      "environmentId": "env_67479257c479",
+      "kind": "CLEAN_WINDOWS_X64",
+      "lifecycle": {
+        "freshInstall": true,
+        "firstStart": true,
+        "upgrade": true,
+        "uninstallRetention": true,
+        "reinstallRecovery": true
+      },
+      "evidenceId": "ev_e19d63a91ae0"
+    },
+    {
+      "environmentId": "env_9cd9c9e7d16d",
+      "kind": "MANAGED_WINDOWS_X64",
+      "lifecycle": {
+        "freshInstall": true,
+        "firstStart": true,
+        "upgrade": true,
+        "uninstallRetention": true,
+        "reinstallRecovery": true
+      },
+      "evidenceId": "ev_92a7071881dc"
+    }
+  ]
+}

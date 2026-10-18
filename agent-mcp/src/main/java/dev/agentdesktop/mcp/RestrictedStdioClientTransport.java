@@ -5,6 +5,9 @@ import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import io.modelcontextprotocol.json.McpJsonMapper;
 import java.nio.file.Path;
 import java.util.Map;
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import reactor.core.publisher.Mono;
@@ -15,6 +18,7 @@ final class RestrictedStdioClientTransport extends StdioClientTransport {
     private final Path workingDirectory;
     private final Map<String,String> environment;
     private final AtomicBoolean exited=new AtomicBoolean();
+    private final CountDownLatch exitLatch=new CountDownLatch(1);
     RestrictedStdioClientTransport(ServerParameters parameters,McpJsonMapper mapper,Path workingDirectory,Map<String,String> environment){
         super(parameters,mapper);this.workingDirectory=workingDirectory;this.environment=Map.copyOf(environment);
     }
@@ -23,7 +27,11 @@ final class RestrictedStdioClientTransport extends StdioClientTransport {
         builder.environment().clear();builder.environment().putAll(environment);return builder;
     }
     @Override public Mono<Void> connect(Function<Mono<McpSchema.JSONRPCMessage>,Mono<McpSchema.JSONRPCMessage>> handler){
-        return super.connect(handler).doOnSuccess(ignored->Thread.ofVirtual().name("mcp-stdio-exit-watch").start(()->{try{super.awaitForExit();}finally{exited.set(true);}}));
+        return super.connect(handler).doOnSuccess(ignored->Thread.ofVirtual().name("mcp-stdio-exit-watch").start(()->{try{super.awaitForExit();}finally{exited.set(true);exitLatch.countDown();}}));
     }
     boolean hasExited(){return exited.get();}
+    boolean awaitExit(Duration timeout){
+        try{return exitLatch.await(timeout.toMillis(),TimeUnit.MILLISECONDS);}
+        catch(InterruptedException exception){Thread.currentThread().interrupt();return false;}
+    }
 }

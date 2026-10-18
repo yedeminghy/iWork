@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "status": "passed",
+  "testerCount": 10,
+  "severityCounts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "lowerSeverityDecisionsComplete": true,
+  "evidenceIds": [
+    "ev_1b41b1bbd1cd",
+    "ev_e0993beea3f7",
+    "ev_02675f4c7b4b",
+    "ev_9b835d644c72",
+    "ev_b77d0c8c4f7e",
+    "ev_a1dfa2df611c",
+    "ev_4e4de6c4c4b4",
+    "ev_6b94403b18cb",
+    "ev_3c39bdb15d21",
+    "ev_d30d6d7ca1f9"
+  ]
+}

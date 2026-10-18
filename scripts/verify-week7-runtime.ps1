@@ -19,14 +19,14 @@ try{
   & node (Join-Path $PSScriptRoot 'verify-week7-electron.mjs');if($LASTEXITCODE-ne 0){throw 'Week 7 Host/Renderer recovery smoke failed'}
 
   $mainHome=Join-Path $testRoot 'main-recovery';New-Item -ItemType Directory -Path $mainHome -Force|Out-Null
-  $env:AGENT_DESKTOP_APP_HOME=$mainHome;$env:AGENT_DESKTOP_SMOKE_LOG=Join-Path $mainHome 'smoke.log';$env:AGENT_DESKTOP_W7_MAIN_CRASH='1';$env:AGENT_W7_EXPECT_NATIVE_EXIT='77';$env:AGENT_W7_EXPECT_LOG='week7-main-crash-host-pid:'
+  $env:AGENT_DESKTOP_APP_HOME=$mainHome;$env:AGENT_DESKTOP_SMOKE_LOG=Join-Path $mainHome 'smoke.log';$env:AGENT_DESKTOP_W7_MAIN_CRASH='1';$env:AGENT_DESKTOP_W7_EXTERNAL_MAIN_CRASH='1';$env:AGENT_W7_EXTERNAL_MAIN_CRASH='1';$env:AGENT_W7_EXPECT_NATIVE_EXIT='1';$env:AGENT_W7_EXPECT_LOG='week7-main-crash-host-pid:'
   & node (Join-Path $PSScriptRoot 'verify-week7-electron.mjs');if($LASTEXITCODE-ne 0){throw 'Week 7 Main crash smoke failed'}
-  Remove-Item Env:AGENT_DESKTOP_W7_MAIN_CRASH;Remove-Item Env:AGENT_W7_EXPECT_NATIVE_EXIT;$env:AGENT_DESKTOP_W7_MAIN_RESTORE='1';$env:AGENT_W7_EXPECT_LOG='week7-main-restored'
+  Remove-Item Env:AGENT_DESKTOP_W7_MAIN_CRASH;Remove-Item Env:AGENT_DESKTOP_W7_EXTERNAL_MAIN_CRASH;Remove-Item Env:AGENT_W7_EXTERNAL_MAIN_CRASH;Remove-Item Env:AGENT_W7_EXPECT_NATIVE_EXIT;$env:AGENT_DESKTOP_W7_MAIN_RESTORE='1';$env:AGENT_W7_EXPECT_LOG='week7-main-restored'
   & node (Join-Path $PSScriptRoot 'verify-week7-electron.mjs');if($LASTEXITCODE-ne 0){throw 'Week 7 Main recovery smoke failed'}
   $passed=$true
   Write-Output '{"result":"passed","checks":["renderer-recovery","host-bounded-restart","zero-replay-workspace-mcp-skill","main-parent-liveness","main-persisted-state-recovery","crash-loop"]}'
 }finally{
-  'AGENT_W7_EXECUTABLE','AGENT_DESKTOP_SMOKE','AGENT_DESKTOP_W7_SMOKE','AGENT_DESKTOP_W7_RENDERER_SMOKE','AGENT_DESKTOP_W7_MAIN_CRASH','AGENT_DESKTOP_W7_MAIN_RESTORE','AGENT_DESKTOP_TEST_FIXTURES','AGENT_DESKTOP_HOST_READY_TIMEOUT_MS','AGENT_DESKTOP_APP_HOME','AGENT_DESKTOP_NODE','AGENT_DESKTOP_W7_MCP_FIXTURE','AGENT_DESKTOP_W7_MCP_MARKER','AGENT_DESKTOP_W7_SKILL_SOURCE','AGENT_DESKTOP_W7_SCRIPT_MARKER','AGENT_DESKTOP_SMOKE_LOG','AGENT_W7_SECRET_SENTINEL','AGENT_W7_REASONING_SENTINEL','AGENT_W7_EXPECT_NATIVE_EXIT','AGENT_W7_EXPECT_LOG'|ForEach-Object{Remove-Item "Env:$_" -ErrorAction SilentlyContinue}
+  'AGENT_W7_EXECUTABLE','AGENT_DESKTOP_SMOKE','AGENT_DESKTOP_W7_SMOKE','AGENT_DESKTOP_W7_RENDERER_SMOKE','AGENT_DESKTOP_W7_MAIN_CRASH','AGENT_DESKTOP_W7_EXTERNAL_MAIN_CRASH','AGENT_W7_EXTERNAL_MAIN_CRASH','AGENT_DESKTOP_W7_MAIN_RESTORE','AGENT_DESKTOP_TEST_FIXTURES','AGENT_DESKTOP_HOST_READY_TIMEOUT_MS','AGENT_DESKTOP_APP_HOME','AGENT_DESKTOP_NODE','AGENT_DESKTOP_W7_MCP_FIXTURE','AGENT_DESKTOP_W7_MCP_MARKER','AGENT_DESKTOP_W7_SKILL_SOURCE','AGENT_DESKTOP_W7_SCRIPT_MARKER','AGENT_DESKTOP_SMOKE_LOG','AGENT_W7_SECRET_SENTINEL','AGENT_W7_REASONING_SENTINEL','AGENT_W7_EXPECT_NATIVE_EXIT','AGENT_W7_EXPECT_LOG'|ForEach-Object{Remove-Item "Env:$_" -ErrorAction SilentlyContinue}
   if($passed){
     if(Test-Path -LiteralPath $testRoot){Remove-Item -LiteralPath $testRoot -Recurse -Force -ErrorAction SilentlyContinue}
   }else{

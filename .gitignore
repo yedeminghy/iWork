@@ -19,6 +19,7 @@ dist/
 # Generated build and release artifacts
 build/
 dist-release/
+dist-release-locked-*/
 library-dependencies/
 packaging/stage/
 packaging/previous-release/

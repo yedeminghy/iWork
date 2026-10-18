@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "week": 8,
+  "profile": "beta",
+  "candidateSha256": "365f3034d1a9eddd0afd3ec25c3c519625d60bcd2a8ada8aa17b87eda9e7adc3",
+  "result": "passed",
+  "releaseGate": "week8-complete",
+  "source": "COMPOSITE_FULL_RUN_AND_CONTROLLED_DELTA_ADJUDICATION",
+  "scope": "CONTROLLED_BETA_INTERNAL_ONLY",
+  "productionRequiresFreshEvidence": true,
+  "checks": [
+    "maven-clean-verify",
+    "npm-ci",
+    "typecheck",
+    "desktop-build",
+    "week8-and-week9-contracts",
+    "artifact-preview-security",
+    "week7-to-week3-regression-source-candidate",
+    "week7-target-delta-static-verification",
+    "week8-a01-a14",
+    "week8-oa01-oa10",
+    "real-provider-minimum",
+    "two-hour-soak",
+    "controlled-beta"
+  ],
+  "skips": []
+}

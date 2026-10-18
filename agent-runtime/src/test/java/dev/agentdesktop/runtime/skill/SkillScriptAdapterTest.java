@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SkillScriptAdapterTest {
+    private static final Duration TEST_SCRIPT_TIMEOUT=Duration.ofSeconds(120);
     @Test
     void executesOnlyActivatedHashPinnedPowerShellPlan(@TempDir Path temp) throws Exception {
         Fixture fixture=fixture(temp,"Set-Content -LiteralPath 'week6-marker.txt' -Value $args[0]\nWrite-Output 'SAFE_SUMMARY'\n");
@@ -133,7 +134,7 @@ class SkillScriptAdapterTest {
         PermissionRepository permissionRepository=new PermissionRepository(database,mapper);var attrs=Files.readAttributes(workspace,java.nio.file.attribute.BasicFileAttributes.class);
         permissionRepository.addRoot(new PermissionStore.FileRootDraft("root_test","ws_default","workspace",workspace.toRealPath().toString(),"path-hash",String.valueOf(attrs.fileKey()),"READ_WRITE",true,false,Instant.now()));
         FileRootGuard guard=new FileRootGuard(permissionRepository);DefaultSkillRuntimeBridge bridge=new DefaultSkillRuntimeBridge(registry);
-        return new Fixture(workspace,script,summary.id(),resource.id(),conversations,bridge,guard,new SkillScriptAdapter(new AgentScopeSkillAdapter(bridge),guard));
+        return new Fixture(workspace,script,summary.id(),resource.id(),conversations,bridge,guard,new SkillScriptAdapter(new AgentScopeSkillAdapter(bridge),guard,TEST_SCRIPT_TIMEOUT));
     }
 
     private static void startTurn(Fixture fixture,String turnId){String suffix=turnId.substring(4);fixture.conversations.startTurn(new ConversationStore.StartTurnCommand("thr_"+suffix,turnId,"run_"+suffix,"mock","itm_"+suffix,"hello",Instant.now()));}

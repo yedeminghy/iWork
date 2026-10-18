@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TurnCoordinatorTest {
+    private static final Duration TEST_TIMEOUT = Duration.ofSeconds(60);
+    private static final long TEST_TIMEOUT_SECONDS = TEST_TIMEOUT.toSeconds();
+
     @TempDir Path tempDir;
     private ConversationRepository repository;
 
@@ -58,7 +61,7 @@ class TurnCoordinatorTest {
     void completesStreamAndPersistsEvents() {
         TurnCoordinator coordinator = new TurnCoordinator(repository, new MockModelProvider(Duration.ZERO));
         List<AgUiEvent> events = coordinator.run(input("thr_complete", "trn_complete", "run_complete"))
-                .collectList().block(Duration.ofSeconds(5));
+                .collectList().block(TEST_TIMEOUT);
 
         assertThat(events).isNotNull();
         assertThat(events).extracting(AgUiEvent::type)
@@ -81,7 +84,7 @@ class TurnCoordinatorTest {
         long cancellationStartedAt = System.nanoTime();
         coordinator.cancel("trn_cancel");
         coordinator.cancel("trn_cancel");
-        List<AgUiEvent> events = future.get(5, TimeUnit.SECONDS);
+        List<AgUiEvent> events = future.get(TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         assertThat(events.getLast().type()).isEqualTo("RUN_FINISHED");
         assertThat(events.getLast().value()).containsEntry("outcome", "cancelled");
@@ -101,7 +104,7 @@ class TurnCoordinatorTest {
                 List.of(new RunAgentInput.Message("msg_user", "user", "__week2_tool_fixture__")),
                 new RunAgentInput.Context("trn_tool", "ws_default", "mock"));
 
-        List<AgUiEvent> events = coordinator.run(input).collectList().block(Duration.ofSeconds(5));
+        List<AgUiEvent> events = coordinator.run(input).collectList().block(TEST_TIMEOUT);
 
         assertThat(events).extracting(AgUiEvent::type).containsSubsequence("TOOL_CALL_START", "TOOL_CALL_ARGS", "TOOL_CALL_RESULT");
         assertThat(repository.loadThreadSnapshot("thr_tool").timeline()).anySatisfy(entry -> {

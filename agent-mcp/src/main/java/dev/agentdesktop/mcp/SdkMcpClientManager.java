@@ -33,10 +33,11 @@ import java.util.concurrent.TimeoutException;
 
 public final class SdkMcpClientManager implements McpClientManager {
     private final McpCatalogRepository repository; private final ObjectMapper mapper; private final Path workspace;
-    private final boolean fixtures; private final Duration requestTimeout; private final ResultSanitizer sanitizer; private final Map<String,Connection> connections=new ConcurrentHashMap<>();
+    private final boolean fixtures; private final Duration requestTimeout; private final Duration connectionTimeout; private final ResultSanitizer sanitizer; private final Map<String,Connection> connections=new ConcurrentHashMap<>();
     private final Map<String,ArrayDeque<String>> stderr=new ConcurrentHashMap<>();
     public SdkMcpClientManager(McpCatalogRepository repository,ObjectMapper mapper,Path workspace,boolean fixtures){this(repository,mapper,workspace,fixtures,Duration.ofSeconds(30));}
-    SdkMcpClientManager(McpCatalogRepository repository,ObjectMapper mapper,Path workspace,boolean fixtures,Duration requestTimeout){this.repository=repository;this.mapper=mapper;this.workspace=workspace.toAbsolutePath().normalize();this.fixtures=fixtures;this.requestTimeout=requestTimeout;this.sanitizer=new ResultSanitizer(mapper);}
+    SdkMcpClientManager(McpCatalogRepository repository,ObjectMapper mapper,Path workspace,boolean fixtures,Duration requestTimeout){this(repository,mapper,workspace,fixtures,requestTimeout,Duration.ofSeconds(10));}
+    SdkMcpClientManager(McpCatalogRepository repository,ObjectMapper mapper,Path workspace,boolean fixtures,Duration requestTimeout,Duration connectionTimeout){this.repository=repository;this.mapper=mapper;this.workspace=workspace.toAbsolutePath().normalize();this.fixtures=fixtures;this.requestTimeout=requestTimeout;this.connectionTimeout=connectionTimeout;this.sanitizer=new ResultSanitizer(mapper);}
 
     @Override public McpServerSummary save(McpServerDraft draft){
         McpDraftValidator.validate(draft,workspace,fixtures); String id=draft.id()==null||draft.id().isBlank()?Ids.newId("mcp"):draft.id();
@@ -56,8 +57,8 @@ public final class SdkMcpClientManager implements McpClientManager {
         int attempts=policy(row).maxAttempts()+1;Throwable last=null;
         EphemeralCredential safeCredential=credential==null?EphemeralCredential.empty():credential;
         for(int attempt=1;attempt<=attempts;attempt++){Connection connection=null;try{
-            connection=open(row,safeCredential);connection.client.initialize().block(Duration.ofSeconds(10));
-            long version=row.catalogVersion()+1;var listed=connection.client.listTools().block(Duration.ofSeconds(10));if(listed==null)throw new McpException("MCP_TIMEOUT","Tool catalog timed out");List<ToolDescriptor> tools=descriptors(id,version,listed.tools());persistTools(id,version,tools);
+            connection=open(row,safeCredential);connection.client.initialize().block(connectionTimeout);
+            long version=row.catalogVersion()+1;var listed=connection.client.listTools().block(connectionTimeout);if(listed==null)throw new McpException("MCP_TIMEOUT","Tool catalog timed out");List<ToolDescriptor> tools=descriptors(id,version,listed.tools());persistTools(id,version,tools);
             connections.put(id,connection);return summary(repository.updateStatus(id,"READY",null,"Connected",Instant.now(),version));
         }catch(Exception e){last=e;closeConnection(connection);if(!retryable(e)||attempt==attempts)break;sleep(backoff(policy(row),attempt));}}
         String code=errorCode(row,last);String diagnostic=safeDiagnostic(last);repository.updateStatus(id,"FAILED",code,diagnostic,null,row.catalogVersion());throw new McpException(code,"MCP connection failed",last);
@@ -110,10 +111,11 @@ public final class SdkMcpClientManager implements McpClientManager {
             ServerParameters params=ServerParameters.builder(row.executable()).args(row.arguments()).env(environment).build();StdioClientTransport stdio=new RestrictedStdioClientTransport(params,McpJsonDefaults.getMapper(),Path.of(row.workingDirectory()),environment);stdio.setStdErrorHandler(line->recordStderr(row.id(),line));transport=stdio;
         }else{
             URI uri=URI.create(row.endpoint());String base=uri.getScheme()+"://"+uri.getAuthority();String endpoint=uri.getRawPath()==null||uri.getRawPath().isBlank()?"/":uri.getRawPath();if(uri.getRawQuery()!=null)endpoint+="?"+uri.getRawQuery();
-            var builder=HttpClientStreamableHttpTransport.builder(base).endpoint(endpoint).connectTimeout(Duration.ofSeconds(10)).customizeClient(client->client.followRedirects(HttpClient.Redirect.NEVER));
+            var builder=HttpClientStreamableHttpTransport.builder(base).endpoint(endpoint).connectTimeout(connectionTimeout).customizeClient(client->client.followRedirects(HttpClient.Redirect.NEVER));
             if(credential.bearerToken()!=null&&!credential.bearerToken().isBlank())builder.httpRequestCustomizer((request,method,target,body,context)->request.header("Authorization","Bearer "+credential.bearerToken()));transport=builder.build();
         }
-        return new Connection(McpClient.async(transport).requestTimeout(Duration.ofSeconds(30)).initializationTimeout(Duration.ofSeconds(10)).build(),credential,transport instanceof RestrictedStdioClientTransport stdio?stdio:null);
+        Duration protocolTimeout=connectionTimeout.compareTo(Duration.ofSeconds(30))>0?connectionTimeout:Duration.ofSeconds(30);
+        return new Connection(McpClient.async(transport).requestTimeout(protocolTimeout).initializationTimeout(connectionTimeout).build(),credential,transport instanceof RestrictedStdioClientTransport stdio?stdio:null);
     }
 
     private McpSchema.CallToolResult awaitTool(Connection connection,String name,Map<String,Object> arguments,CancellationToken cancellation)throws Exception{
@@ -127,7 +129,11 @@ public final class SdkMcpClientManager implements McpClientManager {
         }
     }
 
-    private static void closeConnection(Connection connection){if(connection!=null)try{connection.client.closeGracefully().block(Duration.ofSeconds(5));}catch(Exception ignored){}}
+    private static void closeConnection(Connection connection){
+        if(connection==null)return;
+        try{connection.client.closeGracefully().block(Duration.ofSeconds(5));}catch(Exception ignored){}
+        if(connection.stdio()!=null)connection.stdio().awaitExit(Duration.ofSeconds(5));
+    }
 
     private List<ToolDescriptor> descriptors(String server,long version,List<McpSchema.Tool> tools){List<ToolDescriptor> result=new ArrayList<>();for(McpSchema.Tool tool:tools){JsonNode schema=mapper.valueToTree(tool.inputSchema());String description=tool.description()==null?"":tool.description();if(description.getBytes().length>4096||schema.toString().getBytes().length>32768||depth(schema)>16||properties(schema)>128)continue;RiskClass risk=(fixtures&&("echo".equals(tool.name())||"sum".equals(tool.name())))?RiskClass.DEMO_SAFE:RiskClass.UNKNOWN;result.add(new ToolDescriptor("mcp:"+server+":"+tool.name(),server,tool.name(),tool.title()==null?tool.name():tool.title(),description,schema,risk,true,null));}return result;}
     private void persistTools(String id,long version,List<ToolDescriptor> tools){String now=Instant.now().toString();repository.replaceTools(id,version,tools.stream().map(t->new McpCatalogRepository.ToolRow(t.id(),id,t.name(),t.description(),t.inputSchema().toString(),t.riskClass().name(),t.enabled(),version,now,now)).toList());}
